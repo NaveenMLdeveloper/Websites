@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ertigaBody" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="50%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+    <linearGradient id="glassDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2D3748"/>
+      <stop offset="100%" stop-color="#1A202C"/>
+    </linearGradient>
+    <radialGradient id="shadowGlowE" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.3"/>
+      <stop offset="70%" stop-color="#1E293B" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#1E293B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="300" cy="276" rx="250" ry="20" fill="url(#shadowGlowE)"/>
+
+  <!-- ERTIGA MUV BODY -->
+  <g>
+    <path d="M 78 222 
+             C 78 214, 86 204, 102 196 
+             L 142 182 
+             L 182 134 
+             C 194 122, 212 114, 236 112 
+             L 430 110 
+             C 458 110, 480 118, 500 134 
+             L 532 174 
+             C 544 186, 548 202, 544 220 
+             L 538 244 
+             L 472 244 
+             C 470 216, 442 194, 412 194 
+             C 382 194, 354 216, 352 244 
+             L 218 244 
+             C 216 216, 188 194, 158 194 
+             C 128 194, 100 216, 98 244 
+             L 80 244 
+             Z" 
+          fill="url(#ertigaBody)" stroke="#94A3B8" stroke-width="1.5"/>
+
+    <!-- Grille & Headlamp -->
+    <path d="M 78 218 L 112 206 L 110 236 L 80 238 Z" fill="#334155"/>
+    <line x1="82" y1="222" x2="110" y2="212" stroke="#FFEC03" stroke-width="2"/>
+    <line x1="82" y1="230" x2="110" y2="222" stroke="#FFFFFF" stroke-width="2"/>
+    <polygon points="108,204 148,190 144,204 106,218" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1"/>
+
+    <!-- Windows -->
+    <path d="M 152 180 L 190 136 C 200 126, 216 120, 236 118 L 290 118 L 288 180 Z" fill="url(#glassDark)"/>
+    <path d="M 296 118 L 398 118 L 396 180 L 294 180 Z" fill="url(#glassDark)"/>
+    <path d="M 404 118 L 444 118 C 464 120, 480 130, 496 146 L 512 168 L 492 180 L 402 180 Z" fill="url(#glassDark)"/>
+
+    <!-- Chrome trim -->
+    <path d="M 150 182 L 496 182" stroke="#CBD5E1" stroke-width="2"/>
+
+    <!-- Tail lamp -->
+    <polygon points="516,170 538,194 532,216 512,216" fill="#EF4444"/>
+
+    <!-- Front & Rear Wheels -->
+    <g transform="translate(158, 244)">
+      <circle cx="0" cy="0" r="42" fill="#1E293B"/>
+      <circle cx="0" cy="0" r="38" fill="#0F172A"/>
+      <circle cx="0" cy="0" r="28" fill="#94A3B8"/>
+      <circle cx="0" cy="0" r="10" fill="#333333"/>
+      <circle cx="0" cy="0" r="5" fill="#FFEC03"/>
+    </g>
+    <g transform="translate(412, 244)">
+      <circle cx="0" cy="0" r="42" fill="#1E293B"/>
+      <circle cx="0" cy="0" r="38" fill="#0F172A"/>
+      <circle cx="0" cy="0" r="28" fill="#94A3B8"/>
+      <circle cx="0" cy="0" r="10" fill="#333333"/>
+      <circle cx="0" cy="0" r="5" fill="#FFEC03"/>
+    </g>
+
+    <!-- Permit Badge -->
+    <g transform="translate(290, 192)">
+      <rect x="0" y="0" width="80" height="16" rx="3" fill="#333333" stroke="#FFEC03" stroke-width="1"/>
+      <text x="8" y="11" font-family="'Poppins', sans-serif" font-weight="700" font-size="7" fill="#FFEC03">ALL INDIA PERMIT</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="crystaBody" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#F1F3F5"/>
+      <stop offset="100%" stop-color="#D8DEE4"/>
+    </linearGradient>
+    <linearGradient id="crystaRoof" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8F9FA"/>
+      <stop offset="100%" stop-color="#DEE2E6"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2B3440"/>
+      <stop offset="40%" stop-color="#1E2630"/>
+      <stop offset="100%" stop-color="#111822"/>
+    </linearGradient>
+    <linearGradient id="tireGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3139"/>
+      <stop offset="60%" stop-color="#181B20"/>
+      <stop offset="100%" stop-color="#0E1013"/>
+    </linearGradient>
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2E8F0"/>
+      <stop offset="50%" stop-color="#94A3B8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <radialGradient id="shadowGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.35"/>
+      <stop offset="70%" stop-color="#1E293B" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#1E293B" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="carShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Background Ambient Studio Floor -->
+  <ellipse cx="300" cy="278" rx="270" ry="24" fill="url(#shadowGlow)"/>
+  <ellipse cx="300" cy="280" rx="220" ry="12" fill="#0F172A" opacity="0.25"/>
+
+  <!-- CAR MAIN GROUP -->
+  <g filter="url(#carShadow)">
+    <!-- Main Body Lower Chassis -->
+    <path d="M 64 220 
+             C 64 212, 70 200, 84 192 
+             L 132 178 
+             L 174 126 
+             C 186 112, 204 104, 230 102 
+             L 420 98 
+             C 455 98, 480 106, 502 124 
+             L 538 164 
+             C 552 178, 558 196, 554 216 
+             L 546 244 
+             C 542 252, 532 256, 520 256 
+             L 476 256 
+             C 474 224, 442 200, 410 200 
+             C 378 200, 346 224, 344 256 
+             L 214 256 
+             C 212 224, 180 200, 148 200 
+             C 116 200, 84 224, 82 256 
+             L 68 256 
+             C 58 256, 52 248, 54 238 
+             Z" 
+          fill="url(#crystaBody)" stroke="#CBD5E1" stroke-width="1.5"/>
+
+    <!-- Roofline & Aerodynamic Curve -->
+    <path d="M 180 124 
+             C 192 110, 214 104, 240 102 
+             L 420 98 
+             C 450 98, 474 106, 492 120 
+             L 526 156 
+             L 508 158 
+             L 476 122 
+             C 460 110, 440 106, 410 106 
+             L 242 108 
+             C 218 108, 200 114, 190 126 
+             Z" 
+          fill="url(#crystaRoof)"/>
+
+    <!-- Distinctive Chrome Front Grille (Innova Crysta Signature Trapezoid) -->
+    <path d="M 64 212 L 102 200 L 100 236 L 68 240 Z" fill="#1E293B"/>
+    <path d="M 68 214 L 98 204 L 98 210 L 68 220 Z" fill="#FFEC03"/>
+    <path d="M 68 224 L 98 214 L 98 220 L 68 230 Z" fill="#E2E8F0"/>
+    <path d="M 68 232 L 98 224 L 98 228 L 68 236 Z" fill="#FFEC03"/>
+
+    <!-- Sharp LED Projector Headlamp -->
+    <polygon points="98,198 142,182 136,198 96,212" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1"/>
+    <polygon points="106,202 134,188 130,198 104,208" fill="#FFFFFF"/>
+    <circle cx="118" cy="196" r="4" fill="#38BDF8"/>
+
+    <!-- Side Windows Matrix -->
+    <!-- Front Windshield Side / A-Pillar -->
+    <path d="M 144 176 L 184 128 C 194 118, 210 112, 232 110 L 284 110 L 282 176 L 144 176 Z" fill="url(#glassGrad)"/>
+    <!-- Middle Passenger Window -->
+    <path d="M 292 110 L 402 110 L 400 176 L 290 176 Z" fill="url(#glassGrad)"/>
+    <!-- Rear Quarter Glass -->
+    <path d="M 410 110 L 448 110 C 470 112, 488 122, 504 138 L 518 162 L 498 176 L 408 176 Z" fill="url(#glassGrad)"/>
+
+    <!-- Window Chrome Accent Trim -->
+    <path d="M 142 178 L 284 178 L 404 178 L 500 178 C 506 178, 514 172, 520 162 L 506 138 C 490 120, 470 110, 448 108 L 232 108 C 208 108, 192 116, 182 126 L 140 176" 
+          fill="none" stroke="#E2E8F0" stroke-width="2.5"/>
+    <line x1="288" y1="108" x2="286" y2="178" stroke="#334155" stroke-width="4"/>
+    <line x1="406" y1="108" x2="404" y2="178" stroke="#334155" stroke-width="4"/>
+
+    <!-- Subtle Window Reflections -->
+    <path d="M 200 120 L 260 114 L 240 170 L 180 174 Z" fill="#FFFFFF" opacity="0.12"/>
+    <path d="M 320 114 L 380 114 L 360 172 L 300 172 Z" fill="#FFFFFF" opacity="0.12"/>
+
+    <!-- Side Body Character Crease Lines -->
+    <path d="M 142 188 C 220 184, 340 182, 490 172 L 536 178" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <path d="M 142 190 C 220 186, 340 184, 490 174 L 536 180" fill="none" stroke="#94A3B8" stroke-width="1"/>
+    <!-- Lower Rocker Panel Crease -->
+    <path d="M 218 244 L 340 244" stroke="#64748B" stroke-width="2"/>
+    <path d="M 218 246 L 340 246" stroke="#FFFFFF" stroke-width="1.5"/>
+
+    <!-- Door Handles (Chrome) -->
+    <rect x="238" y="184" width="22" height="6" rx="3" fill="#E2E8F0" stroke="#94A3B8" stroke-width="0.8"/>
+    <rect x="350" y="184" width="22" height="6" rx="3" fill="#E2E8F0" stroke="#94A3B8" stroke-width="0.8"/>
+
+    <!-- Tail Lamp (Innova Inverted L Signature) -->
+    <path d="M 526 166 L 546 190 L 538 214 L 518 214 L 522 192 Z" fill="#EF4444" stroke="#DC2626" stroke-width="1"/>
+    <rect x="526" y="196" width="12" height="8" rx="1" fill="#FFFFFF" opacity="0.85"/>
+
+    <!-- Side Rear View Mirror with Turn Indicator -->
+    <path d="M 166 162 L 186 160 C 192 160, 196 166, 194 172 L 182 178 C 176 180, 170 176, 168 170 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    <line x1="184" y1="168" x2="194" y2="168" stroke="#FFEC03" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- WHEEL ARCHES & TIRES -->
+    <!-- Front Wheel -->
+    <g transform="translate(148, 254)">
+      <!-- Outer Wheel Well Liner -->
+      <circle cx="0" cy="0" r="48" fill="#1E293B"/>
+      <!-- Tire Rubber -->
+      <circle cx="0" cy="0" r="44" fill="url(#tireGrad)"/>
+      <circle cx="0" cy="0" r="34" fill="#0F172A"/>
+      <!-- Alloy Rim Matrix (Innova Crysta 17" Dual-tone diamond cut) -->
+      <circle cx="0" cy="0" r="32" fill="url(#rimGrad)"/>
+      <circle cx="0" cy="0" r="14" fill="#1E293B"/>
+      <circle cx="0" cy="0" r="8" fill="#FFEC03"/>
+      <!-- Dual Tone Spokes -->
+      <g stroke="#F8FAFC" stroke-width="3.5" stroke-linecap="round">
+        <line x1="0" y1="-28" x2="0" y2="28"/>
+        <line x1="-24" y1="-14" x2="24" y2="14"/>
+        <line x1="-24" y1="14" x2="24" y2="-14"/>
+      </g>
+      <g stroke="#334155" stroke-width="2" stroke-linecap="round">
+        <line x1="-14" y1="-24" x2="14" y2="24"/>
+        <line x1="-14" y1="24" x2="14" y2="-24"/>
+      </g>
+    </g>
+
+    <!-- Rear Wheel -->
+    <g transform="translate(410, 254)">
+      <!-- Outer Wheel Well Liner -->
+      <circle cx="0" cy="0" r="48" fill="#1E293B"/>
+      <!-- Tire Rubber -->
+      <circle cx="0" cy="0" r="44" fill="url(#tireGrad)"/>
+      <circle cx="0" cy="0" r="34" fill="#0F172A"/>
+      <!-- Alloy Rim Matrix -->
+      <circle cx="0" cy="0" r="32" fill="url(#rimGrad)"/>
+      <circle cx="0" cy="0" r="14" fill="#1E293B"/>
+      <circle cx="0" cy="0" r="8" fill="#FFEC03"/>
+      <!-- Dual Tone Spokes -->
+      <g stroke="#F8FAFC" stroke-width="3.5" stroke-linecap="round">
+        <line x1="0" y1="-28" x2="0" y2="28"/>
+        <line x1="-24" y1="-14" x2="24" y2="14"/>
+        <line x1="-24" y1="14" x2="24" y2="-14"/>
+      </g>
+      <g stroke="#334155" stroke-width="2" stroke-linecap="round">
+        <line x1="-14" y1="-24" x2="14" y2="24"/>
+        <line x1="-14" y1="24" x2="14" y2="-24"/>
+      </g>
+    </g>
+
+    <!-- Roof Rails -->
+    <path d="M 230 96 L 440 94" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+    <line x1="240" y1="96" x2="240" y2="102" stroke="#475569" stroke-width="3"/>
+    <line x1="430" y1="94" x2="430" y2="100" stroke="#475569" stroke-width="3"/>
+
+    <!-- All India Tourist Permit Badge Sticker -->
+    <g transform="translate(300, 196)">
+      <rect x="0" y="0" width="84" height="18" rx="4" fill="#333333" stroke="#FFEC03" stroke-width="1.2"/>
+      <rect x="2" y="2" width="6" height="14" rx="1.5" fill="#FFEC03"/>
+      <text x="12" y="12" font-family="'Poppins', sans-serif" font-weight="800" font-size="7.5" fill="#FFEC03" letter-spacing="0.5">ALL INDIA PERMIT</text>
+    </g>
+  </g>
+</svg>

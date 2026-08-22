@@ -1,0 +1,256 @@
+/* ==========================================================================
+   BS TRAVELS - HOSUR
+   Responsive Media Queries & Mobile Polish
+   Strict Breakpoint Handling (320px to 1920px)
+   ========================================================================== */
+
+/* --- Tablet / Medium Screen (< 1024px) --- */
+@media screen and (max-width: 1024px) {
+  .desktop-nav {
+    display: none;
+  }
+
+  .hamburger-toggle {
+    display: flex;
+  }
+
+  .top-bar-left .top-bar-item:nth-child(2) {
+    display: none;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .calculator-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calculator-inputs {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 1.5rem;
+  }
+
+  .calculator-results {
+    padding: 2rem 1.5rem;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .cta-banner-inner {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .cta-banner-content p {
+    margin: 0 auto;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* --- Mobile Breakpoint (< 768px) --- */
+@media screen and (max-width: 768px) {
+  /* Prevent content overlap with mobile bottom bar */
+  body {
+    padding-bottom: 68px;
+  }
+
+  .top-bar {
+    display: none;
+  }
+
+  :root {
+    --header-height: 68px;
+  }
+
+  .site-logo {
+    height: 42px;
+  }
+
+  .header-phone {
+    display: none;
+  }
+
+  .section-padding {
+    padding: 3.5rem 0;
+  }
+
+  .section-padding-sm {
+    padding: 2.5rem 0;
+  }
+
+  .hero-section {
+    padding: 2rem 0 3rem 0;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-key-points {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hero-vehicle-card {
+    padding: 1.25rem;
+  }
+
+  .hero-vehicle-img {
+    height: 180px;
+  }
+
+  .features-grid,
+  .fleet-grid,
+  .services-grid,
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .trip-type-tabs {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .trip-type-btn {
+    text-align: center;
+    padding: 0.6rem;
+  }
+
+  .distance-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cta-banner {
+    padding: 2.25rem 1.5rem;
+  }
+
+  .cta-banner-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-banner-actions .btn {
+    width: 100%;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  /* Show Mobile Fixed Action Bar */
+  .mobile-action-bar {
+    display: block;
+  }
+
+  /* Adjust Floating Buttons so they don't cover content or bottom bar */
+  .floating-actions {
+    bottom: 5.25rem;
+    right: 1.25rem;
+  }
+
+  .floating-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .floating-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .modal-dialog {
+    max-height: 95vh;
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+}
+
+/* --- Ultra Small Devices (320px - 375px) --- */
+@media screen and (max-width: 375px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.65rem;
+  }
+
+  .hero-vehicle-specs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .spec-box:last-child {
+    grid-column: span 2;
+  }
+
+  .fleet-specs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .fleet-card-footer .btn {
+    width: 100%;
+  }
+
+  .contact-info-card,
+  .contact-enquiry-box {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* --- Reduced Motion Accessibility --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
