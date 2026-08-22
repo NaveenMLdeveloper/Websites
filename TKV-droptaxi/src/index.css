@@ -2427,3 +2427,58 @@ footer {
   background: var(--secondary);
   color: #fff;
 }
+
+/* Mobile layout safeguards */
+@media (max-width: 640px) {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  #root,
+  .container,
+  .hero-clean-section,
+  .hero-clean-grid,
+  .hero-left-content,
+  .hero-clean-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .nav {
+    gap: 12px;
+  }
+
+  .brand-image {
+    width: 150px;
+    height: 58px;
+  }
+
+  .hero-clean-section {
+    display: block;
+    padding: 86px 0 24px;
+  }
+
+  .hero-clean-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hero-clean-card {
+    margin-left: 0;
+    padding: 16px 14px;
+  }
+
+  .hero-action-buttons {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+}
