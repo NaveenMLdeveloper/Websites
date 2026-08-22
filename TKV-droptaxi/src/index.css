@@ -2482,3 +2482,72 @@ footer {
     max-width: none;
   }
 }
+/* =======================================================
+   MOBILE LAYOUT EMERGENCY PATCH
+   Append to the very end of src/index.css and rebuild.
+   Fixes: content confined to ~50% viewport width on phones,
+   with blank space on the right (nav renders fine because
+   .nav-wrap is position:fixed and escapes normal flow —
+   everything else was stuck in a non-collapsing container).
+   ======================================================= */
+
+/* 1) Hard root-level safety net — independent of any specific
+      component class name, so it can't be missed by a wrapper
+      you don't know about yet. */
+html, body, #root {
+  width: 100% !important;
+  max-width: 100vw !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+#root {
+  display: block !important; /* overrides any leftover flex/grid on #root itself */
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 2) Force every multi-column grid/flex section in this file to
+      stack on phones — including .contact-grid, which had NO
+      mobile override anywhere in the current CSS and will break
+      the Contact page the same way once you get there. */
+@media (max-width: 768px) {
+  .hero-clean-grid,
+  .why-split-grid,
+  .about-grid,
+  .contact-grid,
+  .footer-top,
+  .calc-wrap {
+    display: block !important;
+  }
+  .hero-clean-grid > *,
+  .why-split-grid > *,
+  .about-grid > *,
+  .contact-grid > *,
+  .footer-top > *,
+  .calc-wrap > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .contact-grid > * + *,
+  .about-grid > * + *,
+  .why-split-grid > * + * {
+    margin-top: 24px !important;
+  }
+
+  .grid-4, .grid-3, .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 3) Belt-and-braces: nothing in the tree should ever be wider
+      than the viewport, even if a future component forgets to
+      account for mobile. */
+@media (max-width: 640px) {
+  main, section, .section, .container {
+    max-width: 100vw !important;
+    overflow-x: hidden;
+  }
+}
