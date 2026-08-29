@@ -6,6 +6,7 @@ import {
   REVIEWS,
   POPULAR_CITIES,
   POPULAR_DISTANCES,
+  POPULAR_ROUTE_CARDS,
   Vehicle
 } from './data/travelData';
 import {
@@ -45,7 +46,49 @@ import {
   GooglePlayColorIcon,
   AppleStoreWhiteIcon
 } from './components/Icons';
-import brandLogo from '../images/logo/main.png';
+import brandLogo from '../public/images/logo/main.png';
+const CAB_SELECTION_OPTIONS = [
+  {
+    id: 'dzire',
+    name: 'SEDAN',
+    subtitle: 'Swift Dzire',
+    onewayRate: 15,
+    roundRate: 13,
+    localPackage: { baseFare: 2000, baseKm: 100, baseHours: 8, extraKmRate: 14, waitingPerHour: 150 },
+    seats: 4,
+    image: '/images/vehicles/Sedan.png'
+  },
+  {
+    id: 'etios',
+    name: 'ETIOS',
+    subtitle: 'Toyota Etios',
+    onewayRate: 15,
+    roundRate: 13,
+    localPackage: { baseFare: 2000, baseKm: 100, baseHours: 8, extraKmRate: 14, waitingPerHour: 150 },
+    seats: 4,
+    image: '/images/vehicles/Toyota%20Etios.png'
+  },
+  {
+    id: 'ertiga',
+    name: 'SUV',
+    subtitle: 'Maruti Ertiga',
+    onewayRate: 19,
+    roundRate: 18,
+    localPackage: { baseFare: 2800, baseKm: 100, baseHours: 8, extraKmRate: 17, waitingPerHour: 180 },
+    seats: 6,
+    image: '/images/vehicles/SUV.png'
+  },
+  {
+    id: 'crysta',
+    name: 'INNOVA',
+    subtitle: 'Innova Crysta',
+    onewayRate: 20,
+    roundRate: 22,
+    localPackage: { baseFare: 3500, baseKm: 100, baseHours: 8, extraKmRate: 18, waitingPerHour: 190 },
+    seats: 7,
+    image: '/images/vehicles/Toyota%20Innova.png'
+  }
+];
 
 export default function App() {
   // Mobile drawer
@@ -53,8 +96,8 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
-  // Hero Booking Form State (Sim Drop Taxi style)
-  const [heroTripType, setHeroTripType] = useState<'oneway' | 'roundtrip' | 'outstation'>('oneway');
+  // Hero Booking Form State
+  const [heroTripType, setHeroTripType] = useState<'oneway' | 'roundtrip' | 'local'>('oneway');
   const [heroPickup, setHeroPickup] = useState('Hosur');
   const [heroDrop, setHeroDrop] = useState('Chennai');
   const [heroDate, setHeroDate] = useState(() => {
@@ -67,12 +110,11 @@ export default function App() {
   const [heroPhone, setHeroPhone] = useState('');
 
   // Fare calculator state
-  const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'rental'>('oneway');
+  const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'local'>('oneway');
   const [selectedVehicleIndex, setSelectedVehicleIndex] = useState(0);
   const [distanceKm, setDistanceKm] = useState<number>(120);
-  const [numDays, setNumDays] = useState<number>(1);
-  const [nightStay, setNightStay] = useState(false);
-  const [driverAllowance, setDriverAllowance] = useState(true);
+  const [extraKm, setExtraKm] = useState<number>(0);
+  const [extraHours, setExtraHours] = useState<number>(0);
 
   // Contact form state
   const [contactName, setContactName] = useState('');
@@ -91,8 +133,31 @@ export default function App() {
 
   // Selected vehicle in hero
   const heroSelectedVehicle = useMemo(() => {
-    return VEHICLES.find(v => v.id === heroVehicleId) || VEHICLES[0];
-  }, [heroVehicleId]);
+    const fromCabList = CAB_SELECTION_OPTIONS.find(c => c.id === heroVehicleId);
+    if (fromCabList) {
+      const matchInVehicles = VEHICLES.find(v => v.id === heroVehicleId);
+      const activeRate = heroTripType === 'roundtrip' ? fromCabList.roundRate : fromCabList.onewayRate;
+      return matchInVehicles ? { ...matchInVehicles, rate: activeRate, onewayRate: fromCabList.onewayRate, roundRate: fromCabList.roundRate, localPackage: fromCabList.localPackage } : {
+        id: fromCabList.id,
+        name: fromCabList.subtitle,
+        seats: fromCabList.seats,
+        luggage: '3 Bags',
+        fuel: 'Diesel',
+        ac: true,
+        type: (fromCabList.id === 'dzire' || fromCabList.id === 'etios' ? 'sedan' : 'suv') as 'sedan' | 'suv',
+        rate: activeRate,
+        onewayRate: fromCabList.onewayRate,
+        roundRate: fromCabList.roundRate,
+        localPackage: fromCabList.localPackage,
+        minKm: 250,
+        image: '',
+        features: []
+      };
+    }
+    const defaultV = VEHICLES.find(v => v.id === heroVehicleId) || VEHICLES[0];
+    const activeRate = heroTripType === 'roundtrip' ? defaultV.roundRate : defaultV.onewayRate;
+    return { ...defaultV, rate: activeRate };
+  }, [heroVehicleId, heroTripType]);
 
   // Distance calculation for hero
   const heroDistance = useMemo(() => {
@@ -105,28 +170,43 @@ export default function App() {
 
   // Estimation for hero form
   const heroEstimate = useMemo(() => {
+    if (heroTripType === 'local') {
+      const pkg = heroSelectedVehicle.localPackage || {
+        baseFare: 2000,
+        baseKm: 100,
+        baseHours: 8,
+        extraKmRate: 14,
+        waitingPerHour: 150
+      };
+      return {
+        distance: pkg.baseKm,
+        billedKm: pkg.baseKm,
+        rate: pkg.extraKmRate,
+        total: pkg.baseFare,
+        zeroReturn: false,
+        isLocal: true,
+        pkg
+      };
+    }
+
     const effectiveDistance = heroTripType === 'roundtrip' ? heroDistance * 2 : heroDistance;
     const billedKm = Math.max(effectiveDistance, heroSelectedVehicle.minKm);
-    let fare = billedKm * heroSelectedVehicle.rate;
-    
-    if (heroTripType === 'roundtrip') {
-      fare += 700; // Includes day allowance
-    } else if (heroTripType === 'outstation') {
-      fare += 700;
-    }
+    const applicableRate = heroTripType === 'roundtrip' ? heroSelectedVehicle.roundRate : heroSelectedVehicle.onewayRate;
+    const fare = billedKm * applicableRate;
 
     return {
       distance: effectiveDistance,
       billedKm,
-      rate: heroSelectedVehicle.rate,
+      rate: applicableRate,
       total: Math.round(fare),
-      zeroReturn: heroTripType === 'oneway'
+      zeroReturn: heroTripType === 'oneway',
+      isLocal: false
     };
   }, [heroDistance, heroSelectedVehicle, heroTripType]);
 
   // Format currency in Indian Rupees format (e.g. ₹1,400)
   const formatINR = (val: number) => {
-    return '\u20B9' + Math.round(val).toLocaleString('en-IN');
+    return '₹' + Math.round(val).toLocaleString('en-IN');
   };
 
   // Generate WhatsApp estimation link for Hero
@@ -135,25 +215,33 @@ export default function App() {
       ? 'One Way Drop Taxi' 
       : heroTripType === 'roundtrip' 
         ? 'Round Trip Taxi' 
-        : 'Outstation / Airport Taxi';
+        : 'Local Trip (8 Hours / 100 KM)';
     
-    const message = `*BOOK YOUR TAXI - INSTANT ESTIMATION*\n` +
+    let message = `🚖 *BOOK YOUR TAXI - INSTANT ESTIMATION*\n` +
       `----------------------------------------\n` +
-      `\u2022 *Trip Type:* ${tripLabel}\n` +
-      `\u2022 *From:* ${heroPickup || 'Hosur'}\n` +
-      `\u2022 *To:* ${heroDrop || 'Chennai'}\n` +
-      `\u2022 *Date & Time:* ${heroDate || 'Today'} at ${heroTime || 'Now'}\n` +
-      `\u2022 *Vehicle:* ${heroSelectedVehicle.name} (${heroSelectedVehicle.type.toUpperCase()})\n` +
-      `\u2022 *Approx Distance:* ${heroEstimate.distance} km\n` +
-      `\u2022 *Base Rate:* \u20B9${heroEstimate.rate}/km\n` +
-      `\u2022 *Estimated Total:* ${formatINR(heroEstimate.total)} ${heroEstimate.zeroReturn ? '(Zero Return Charges!)' : ''}\n` +
-      (heroName ? `\u2022 *Passenger Name:* ${heroName}\n` : '') +
-      (heroPhone ? `\u2022 *WhatsApp / Phone:* ${heroPhone}\n` : '') +
+      `• *Trip Type:* ${tripLabel}\n` +
+      `• *From:* ${heroPickup || 'Hosur'}\n` +
+      `• *To:* ${heroDrop || 'Chennai'}\n` +
+      `• *Date & Time:* ${heroDate || 'Today'} at ${heroTime || 'Now'}\n` +
+      `• *Vehicle:* ${heroSelectedVehicle.name} (${heroSelectedVehicle.type.toUpperCase()})\n`;
+
+    if (heroTripType === 'local') {
+      message += `• *Local Package:* 8 Hours / 100 KM\n` +
+        `• *Estimated Base Fare:* ${formatINR(heroEstimate.total)}\n` +
+        `• *Extra Rate:* ₹${heroSelectedVehicle.localPackage?.extraKmRate || 14}/km | ₹${heroSelectedVehicle.localPackage?.waitingPerHour || 150}/hr waiting\n`;
+    } else {
+      message += `• *Approx Distance:* ${heroEstimate.distance} km ${heroTripType === 'roundtrip' ? '(Round Trip)' : ''}\n` +
+        `• *Base Rate:* ₹${heroEstimate.rate}/km\n` +
+        `• *Estimated Total:* ${formatINR(heroEstimate.total)} ${heroEstimate.zeroReturn ? '(Zero Return Charges!)' : ''}\n`;
+    }
+
+    message += `• *Toll & Parking:* Extra\n` +
+      (heroName ? `• *Passenger Name:* ${heroName}\n` : '') +
+      (heroPhone ? `• *WhatsApp / Phone:* ${heroPhone}\n` : '') +
       `----------------------------------------\n` +
       `Please confirm availability and dispatch details.`;
 
-    const params = new URLSearchParams({ text: message });
-    return `https://wa.me/${CONFIG.whatsapp}?${params.toString()}`;
+    return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(message)}`;
   };
 
   // Swap pickup & drop
@@ -168,7 +256,7 @@ export default function App() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 30);
 
-      const sectionIds = ['home', 'fleet', 'services', 'fare-calculator', 'about', 'contact'];
+      const sectionIds = ['home', 'fleet', 'popular-routes', 'services', 'fare-calculator', 'about', 'contact'];
       const scrollPos = window.scrollY + 160;
 
       for (let i = sectionIds.length - 1; i >= 0; i--) {
@@ -218,50 +306,85 @@ export default function App() {
 
   // Fare calculations
   const calculation = useMemo(() => {
-    const dist = Math.max(distanceKm || 1, 1);
-    const days = Math.max(numDays || 1, 1);
+    if (tripType === 'local') {
+      const pkg = currentVehicle.localPackage || {
+        baseFare: 2000,
+        baseKm: 100,
+        baseHours: 8,
+        extraKmRate: 14,
+        waitingPerHour: 150
+      };
+      const validExtraKm = Math.max(Number(extraKm) || 0, 0);
+      const validExtraHours = Math.max(Number(extraHours) || 0, 0);
+      const extraKmCost = validExtraKm * pkg.extraKmRate;
+      const extraWaitingCost = validExtraHours * pkg.waitingPerHour;
+      const total = pkg.baseFare + extraKmCost + extraWaitingCost;
 
-    let effectiveKm = dist;
-    if (tripType === 'roundtrip') {
-      effectiveKm = dist * 2;
+      return {
+        tripType: 'local',
+        pkg,
+        baseFare: pkg.baseFare,
+        extraKm: validExtraKm,
+        extraKmCost,
+        extraHours: validExtraHours,
+        extraWaitingCost,
+        ratePerKm: pkg.extraKmRate,
+        billedKm: pkg.baseKm + validExtraKm,
+        total,
+        dist: pkg.baseKm + validExtraKm
+      };
     }
+
+    const dist = Math.max(Number(distanceKm) || 1, 1);
+    const applicableRate = tripType === 'roundtrip' ? currentVehicle.roundRate : currentVehicle.onewayRate;
+    const effectiveKm = tripType === 'roundtrip' ? dist * 2 : dist;
     const billedKm = Math.max(effectiveKm, currentVehicle.minKm);
-
-    let baseFare = billedKm * currentVehicle.rate;
-    if (tripType === 'rental') {
-      baseFare = currentVehicle.rate * dist * days;
-    }
-
-    const bata = driverAllowance ? 700 * days : 0;
-    const night = nightStay ? 300 * days : 0;
-    const toll = Math.round(billedKm * 1.5);
-    const subtotal = baseFare + bata + night + toll;
-    const gst = subtotal * 0.05;
-    const total = subtotal + gst;
+    const baseFare = billedKm * applicableRate;
+    const total = baseFare;
 
     return {
+      tripType,
+      ratePerKm: applicableRate,
       billedKm,
       baseFare,
-      bata,
-      night,
-      toll,
-      gst,
       total,
-      days,
       dist
     };
-  }, [tripType, currentVehicle, distanceKm, numDays, nightStay, driverAllowance]);
+  }, [tripType, currentVehicle, distanceKm, extraKm, extraHours]);
 
   // Generate WhatsApp message for calculator
   const getWhatsAppQuoteUrl = () => {
-    const tripLabel = tripType === 'oneway' ? 'One Way' : tripType === 'roundtrip' ? 'Round Trip' : 'Rental';
-    const message = `Hi Bhuvaneshvari Travels, I'd like a fare quote:\n• Vehicle: ${currentVehicle.name}\n• Trip Type: ${tripLabel}\n• Distance: ${calculation.dist} km\n• Days: ${calculation.days}\n• Estimated Fare: ${formatINR(calculation.total)}\nPlease confirm vehicle availability.`;
+    const tripLabel = tripType === 'oneway' 
+      ? 'One Way Drop Taxi' 
+      : tripType === 'roundtrip' 
+        ? 'Round Trip Taxi' 
+        : 'Local Trip (8 Hours / 100 KM)';
+    
+    let message = `🚖 *TKV DROP TAXI - INSTANT TRIP ESTIMATE*\n` +
+      `----------------------------------------\n` +
+      `• *Vehicle:* ${currentVehicle.name}\n` +
+      `• *Trip Type:* ${tripLabel}\n`;
+
+    if (tripType === 'local') {
+      message += `• *Local Package:* 8 Hours / 100 KM (₹${calculation.baseFare})\n` +
+        (calculation.extraKm ? `• *Extra KM:* ${calculation.extraKm} km (+₹${calculation.extraKmCost})\n` : '') +
+        (calculation.extraHours ? `• *Extra Waiting:* ${calculation.extraHours} hrs (+₹${calculation.extraWaitingCost})\n` : '');
+    } else {
+      message += `• *Distance:* ${distanceKm} km ${tripType === 'roundtrip' ? `(Round Trip Billed: ${calculation.billedKm} km)` : ''}\n` +
+        `• *Rate:* ₹${calculation.ratePerKm}/km\n`;
+    }
+
+    message += `• *Estimated Fare:* ${formatINR(calculation.total)}\n` +
+      `• *Toll & Parking:* Extra\n` +
+      `----------------------------------------\n` +
+      `Please confirm vehicle availability and booking.`;
+
     return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(message)}`;
   };
 
   // Vehicle specific booking URL
   const getVehicleBookingUrl = (vName: string) => {
-    const msg = `Hi Bhuvaneshvari Travels, I'd like to book the ${vName}. Please share availability and fare.`;
+    const msg = `Hi TKV Drop Taxi, I'd like to book the ${vName}. Please share availability and fare.`;
     return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
   };
 
@@ -273,7 +396,7 @@ export default function App() {
       setShowToast(false);
     }, 4000);
 
-    const msg = `Hi Bhuvaneshvari Travels, my name is ${contactName || '—'} (${contactPhone || '—'}). Trip details: ${contactTrip || 'Please contact me.'}`;
+    const msg = `Hi TKV Drop Taxi, my name is ${contactName || '—'} (${contactPhone || '—'}). Trip details: ${contactTrip || 'Please contact me.'}`;
     window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
 
     setContactName('');
@@ -324,18 +447,44 @@ export default function App() {
     }
   };
 
+  // Select Popular Route -> Pre-fills Hero Booking Form and smoothly scrolls up
+  const handleSelectPopularRoute = (from: string, to: string) => {
+    setHeroPickup(from);
+    setHeroDrop(to);
+    const heroCard = document.getElementById('heroBookingCard');
+    if (heroCard) {
+      heroCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      heroCard.classList.add('pulse-glow');
+      setTimeout(() => heroCard.classList.remove('pulse-glow'), 1800);
+    }
+  };
+
+  // Generate WhatsApp inquiry link for popular route categories
+  const getPopularRouteWhatsAppUrl = (category: string) => {
+    const text = `🚖 *TKV DROP TAXI - ${category.toUpperCase()} INQUIRY*\n` +
+      `----------------------------------------\n` +
+      `Hello TKV Drop Taxi Team,\n` +
+      `I would like to inquire about popular ${category} fares and vehicle availability.\n` +
+      `Pickup Area: Hosur / Bangalore\n` +
+      `Date: ${heroDate || 'Immediate'}\n` +
+      `----------------------------------------\n` +
+      `Please share the tariff and booking details.`;
+    return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(text)}`;
+  };
+
   return (
     <div className="min-h-screen bg-white text-[#111827] flex flex-col font-sans">
       {/* ============ HEADER / NAV ============ */}
       <header className={`nav-wrap ${scrolled ? 'scrolled' : ''}`} id="navWrap">
         <div className="container nav">
           <a href="#home" className="logo" id="headerLogo">
-            <img className="brand-image" src={brandLogo} alt="TKV Drop Taxi" />
+            <img src={brandLogo} alt="TKV Drop Taxi Logo" className="logo-mark" />
           </a>
 
           <nav className="nav-links" id="navLinks">
             <a href="#home" className={activeSection === 'home' ? 'active' : ''}>Home</a>
             <a href="#fleet" className={activeSection === 'fleet' ? 'active' : ''}>Fleet</a>
+            <a href="#popular-routes" className={activeSection === 'popular-routes' ? 'active' : ''}>Routes</a>
             <a href="#services" className={activeSection === 'services' ? 'active' : ''}>Services</a>
             <a href="#fare-calculator" className={activeSection === 'fare-calculator' ? 'active' : ''}>Fare Calculator</a>
             <a href="#about" className={activeSection === 'about' ? 'active' : ''}>About</a>
@@ -372,7 +521,7 @@ export default function App() {
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`} id="mobileMenu">
         <div className="mobile-menu-top">
           <a href="#home" className="logo" onClick={() => setMobileMenuOpen(false)}>
-            <img className="brand-image" src={brandLogo} alt="TKV Drop Taxi" />
+            <img src={brandLogo} alt="TKV Drop Taxi Logo" className="logo-mark" />
           </a>
           <button
             className="mobile-menu-close"
@@ -386,6 +535,7 @@ export default function App() {
 
         <a href="#home" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Home</a>
         <a href="#fleet" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Fleet</a>
+        <a href="#popular-routes" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Routes</a>
         <a href="#services" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Services</a>
         <a href="#fare-calculator" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Fare Calculator</a>
         <a href="#about" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>About</a>
@@ -494,171 +644,203 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right Column: Simplified "Book Your Ride" Card */}
+              {/* Right Column: Image-Based "Book Your Taxi Now" Card (as in reference image) */}
               <div className="hero-clean-card" id="heroBookingCard">
-                <h2 className="clean-card-title">Book Your Ride</h2>
-
-                {/* Clean Trip Type Tabs */}
-                <div className="clean-trip-tabs">
-                  <button
-                    type="button"
-                    className={`clean-trip-tab ${heroTripType === 'oneway' ? 'active' : ''}`}
-                    onClick={() => setHeroTripType('oneway')}
-                    id="heroTabOneWay"
-                  >
-                    One Way Drop
-                  </button>
-                  <button
-                    type="button"
-                    className={`clean-trip-tab ${heroTripType === 'roundtrip' ? 'active' : ''}`}
-                    onClick={() => setHeroTripType('roundtrip')}
-                    id="heroTabRound"
-                  >
-                    Round Trip
-                  </button>
-                  <button
-                    type="button"
-                    className={`clean-trip-tab ${heroTripType === 'outstation' ? 'active' : ''}`}
-                    onClick={() => setHeroTripType('outstation')}
-                    id="heroTabOutstation"
-                  >
-                    Airport / Rental
-                  </button>
+                <div className="clean-card-header">
+                  <h2 className="clean-card-title">Book Your Taxi Now</h2>
+                  <p className="clean-card-subtitle">Get instant estimation on WhatsApp</p>
                 </div>
 
-                {/* Simple Form Fields */}
-                <div className="clean-form-fields">
-                  {/* From Field */}
-                  <div className="clean-field-group">
-                    <label htmlFor="heroPickupInput">From</label>
-                    <div className="clean-input-wrap">
-                      <PinIcon className="clean-input-icon text-[#1E40AF]" />
-                      <input
-                        type="text"
-                        id="heroPickupInput"
-                        value={heroPickup}
-                        onChange={(e) => setHeroPickup(e.target.value)}
-                        placeholder="Pickup Location"
-                        className="clean-input"
-                      />
-                    </div>
+                <div className="clean-card-body">
+                  {/* Clean Trip Type Tabs */}
+                  <div className="clean-trip-tabs">
+                    <button
+                      type="button"
+                      className={`clean-trip-tab ${heroTripType === 'oneway' ? 'active' : ''}`}
+                      onClick={() => setHeroTripType('oneway')}
+                      id="heroTabOneWay"
+                    >
+                      One Way
+                    </button>
+                    <button
+                      type="button"
+                      className={`clean-trip-tab ${heroTripType === 'roundtrip' ? 'active' : ''}`}
+                      onClick={() => setHeroTripType('roundtrip')}
+                      id="heroTabRound"
+                    >
+                      Round Trip
+                    </button>
+                    <button
+                      type="button"
+                      className={`clean-trip-tab ${heroTripType === 'local' ? 'active' : ''}`}
+                      onClick={() => setHeroTripType('local')}
+                      id="heroTabLocal"
+                    >
+                      Local Trip
+                    </button>
                   </div>
 
-                  {/* To Field */}
-                  <div className="clean-field-group">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="heroDropInput">To</label>
-                      <button
-                        type="button"
-                        onClick={handleSwapCities}
-                        className="text-[11px] font-semibold text-[#1E40AF] hover:underline flex items-center gap-1 cursor-pointer"
-                        title="Swap Pickup and Drop"
-                      >
-                        ⇄ Swap
-                      </button>
-                    </div>
-                    <div className="clean-input-wrap">
-                      <PinIcon className="clean-input-icon text-[#16A34A]" />
-                      <input
-                        type="text"
-                        id="heroDropInput"
-                        value={heroDrop}
-                        onChange={(e) => setHeroDrop(e.target.value)}
-                        placeholder="Drop Location"
-                        className="clean-input"
-                      />
-                    </div>
-                  </div>
+                  {/* Clean Form Fields */}
+                  <div className="clean-form-fields">
+                    {/* Row 1: Name & Mobile */}
+                    <div className="clean-fields-row">
+                      <div className="clean-field-group">
+                        <label htmlFor="heroNameInput" className="clean-field-caps-label">NAME</label>
+                        <div className="clean-input-wrap">
+                          <input
+                            type="text"
+                            id="heroNameInput"
+                            value={heroName}
+                            onChange={(e) => setHeroName(e.target.value)}
+                            placeholder="Full name"
+                            className="clean-input clean-text-input"
+                          />
+                        </div>
+                      </div>
 
-                  {/* Date & Time Row */}
-                  <div className="clean-fields-row">
-                    <div className="clean-field-group">
-                      <label htmlFor="heroDateInput">Date</label>
-                      <div className="clean-input-wrap">
-                        <ClockIcon className="clean-input-icon text-[#64748B]" />
-                        <input
-                          type="date"
-                          id="heroDateInput"
-                          value={heroDate}
-                          onChange={(e) => setHeroDate(e.target.value)}
-                          className="clean-input"
-                        />
+                      <div className="clean-field-group">
+                        <label htmlFor="heroPhoneInput" className="clean-field-caps-label">MOBILE</label>
+                        <div className="clean-input-wrap">
+                          <input
+                            type="tel"
+                            id="heroPhoneInput"
+                            value={heroPhone}
+                            onChange={(e) => setHeroPhone(e.target.value)}
+                            placeholder="Mobile Number"
+                            className="clean-input clean-text-input"
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="clean-field-group">
-                      <label htmlFor="heroTimeInput">Time</label>
-                      <div className="clean-input-wrap">
-                        <select
-                          id="heroTimeInput"
-                          value={heroTime}
-                          onChange={(e) => setHeroTime(e.target.value)}
-                          className="clean-select"
-                        >
-                          <option value="06:00 AM">06:00 AM</option>
-                          <option value="08:00 AM">08:00 AM</option>
-                          <option value="10:00 AM">10:00 AM</option>
-                          <option value="12:00 PM">12:00 PM</option>
-                          <option value="03:00 PM">03:00 PM</option>
-                          <option value="06:00 PM">06:00 PM</option>
-                          <option value="09:00 PM">09:00 PM</option>
-                          <option value="11:30 PM">11:30 PM</option>
-                        </select>
+                    {/* Row 2: From & To in the Same Row */}
+                    <div className="clean-fields-row">
+                      <div className="clean-field-group">
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="heroPickupInput" className="clean-field-caps-label">FROM</label>
+                          <button
+                            type="button"
+                            onClick={handleSwapCities}
+                            className="text-[10px] font-bold text-[#0066CC] hover:underline flex items-center gap-0.5 cursor-pointer transition-colors"
+                            title="Swap Pickup and Drop"
+                          >
+                            ⇄ Swap
+                          </button>
+                        </div>
+                        <div className="clean-input-wrap">
+                          <span className="clean-input-dot dot-green"></span>
+                          <input
+                            type="text"
+                            id="heroPickupInput"
+                            value={heroPickup}
+                            onChange={(e) => setHeroPickup(e.target.value)}
+                            placeholder="Pickup City/Loc"
+                            className="clean-input clean-input-with-dot"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="clean-field-group">
+                        <label htmlFor="heroDropInput" className="clean-field-caps-label">TO</label>
+                        <div className="clean-input-wrap">
+                          <span className="clean-input-dot dot-red"></span>
+                          <input
+                            type="text"
+                            id="heroDropInput"
+                            value={heroDrop}
+                            onChange={(e) => setHeroDrop(e.target.value)}
+                            placeholder="Drop City/Loc"
+                            className="clean-input clean-input-with-dot"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Pickup Date & Pickup Time */}
+                    <div className="clean-fields-row">
+                      <div className="clean-field-group">
+                        <label htmlFor="heroDateInput" className="clean-field-caps-label">PICKUP DATE</label>
+                        <div className="clean-input-wrap">
+                          <input
+                            type="date"
+                            id="heroDateInput"
+                            value={heroDate}
+                            onChange={(e) => setHeroDate(e.target.value)}
+                            className="clean-input clean-date-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="clean-field-group">
+                        <label htmlFor="heroTimeInput" className="clean-field-caps-label">PICKUP TIME</label>
+                        <div className="clean-input-wrap clean-select-wrap">
+                          <select
+                            id="heroTimeInput"
+                            value={heroTime}
+                            onChange={(e) => setHeroTime(e.target.value)}
+                            className="clean-select"
+                          >
+                            <option value="12:00 AM">12:00 AM</option>
+                            <option value="02:00 AM">02:00 AM</option>
+                            <option value="04:00 AM">04:00 AM</option>
+                            <option value="06:00 AM">06:00 AM</option>
+                            <option value="08:00 AM">08:00 AM</option>
+                            <option value="10:00 AM">10:00 AM</option>
+                            <option value="12:00 PM">12:00 PM</option>
+                            <option value="02:00 PM">02:00 PM</option>
+                            <option value="04:00 PM">04:00 PM</option>
+                            <option value="06:00 PM">06:00 PM</option>
+                            <option value="08:00 PM">08:00 PM</option>
+                            <option value="10:00 PM">10:00 PM</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 5: SELECT YOUR CAB (IMAGE-BASED 4 CARS) */}
+                    <div className="clean-cab-selector-block">
+                      <label className="clean-field-caps-label select-cab-title">SELECT YOUR CAB</label>
+                      <div className="cab-cards-grid">
+                        {CAB_SELECTION_OPTIONS.map((cab) => {
+                          const isSelected = heroVehicleId === cab.id;
+                          const rateLabel = heroTripType === 'local' 
+                            ? `₹${cab.localPackage.baseFare} / 8h`
+                            : heroTripType === 'roundtrip'
+                              ? `${cab.roundRate} ₹ / Km`
+                              : `${cab.onewayRate} ₹ / Km`;
+
+                          return (
+                            <button
+                              key={cab.id}
+                              type="button"
+                              id={`cabSelectBtn_${cab.id}`}
+                              onClick={() => setHeroVehicleId(cab.id)}
+                              className={`cab-select-card ${isSelected ? 'selected' : ''}`}
+                              title={`${cab.subtitle} - ${rateLabel}`}
+                            >
+                              <div className="cab-card-rate">{rateLabel}</div>
+                              <div className="cab-card-img-box">
+                                <img src={cab.image} alt={cab.subtitle} className="cab-card-svg" />
+                              </div>
+                              <div className="cab-card-name">{cab.name}</div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
 
-                  {/* Passengers & Vehicle Dropdown */}
-                  <div className="clean-field-group">
-                    <label htmlFor="heroVehicleSelect">Passengers &amp; Vehicle</label>
-                    <div className="clean-input-wrap">
-                      <UserIcon className="clean-input-icon text-[#64748B]" />
-                      <select
-                        id="heroVehicleSelect"
-                        value={heroVehicleId}
-                        onChange={(e) => setHeroVehicleId(e.target.value)}
-                        className="clean-select"
-                      >
-                        <option value="dzire">4 Passengers — Swift Dzire (₹14/km)</option>
-                        <option value="etios">4 Passengers — Toyota Etios (₹15/km)</option>
-                        <option value="ertiga">6 Passengers — Maruti Ertiga (₹16/km)</option>
-                        <option value="innova">7 Passengers — Toyota Innova (₹18/km)</option>
-                        <option value="crysta">7 Passengers — Innova Crysta (₹21/km)</option>
-                        <option value="tt12">12 Passengers — Force Traveller (₹26/km)</option>
-                        <option value="tt17">17 Passengers — Luxury Traveller (₹26/km)</option>
-                        <option value="minibus">25 Passengers — Mini Bus Coach (₹30/km)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Contact Number */}
-                  <div className="clean-field-group">
-                    <label htmlFor="heroPhoneInput">Phone / WhatsApp Number</label>
-                    <div className="clean-input-wrap">
-                      <PhoneIcon className="clean-input-icon text-[#64748B]" />
-                      <input
-                        type="tel"
-                        id="heroPhoneInput"
-                        value={heroPhone}
-                        onChange={(e) => setHeroPhone(e.target.value)}
-                        placeholder="e.g. 98765 43210"
-                        className="clean-input"
-                      />
-                    </div>
-                  </div>
+                  {/* Primary Action Button: GET ESTIMATION */}
+                  <a
+                    href={getHeroWhatsAppUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="clean-get-estimation-btn"
+                    id="heroGetEstimationBtn"
+                  >
+                    <span>GET ESTIMATION</span>
+                  </a>
                 </div>
-
-                {/* Primary Action Button: CHECK FARE */}
-                <a
-                  href={getHeroWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="clean-check-fare-btn"
-                  id="heroCheckFareBtn"
-                >
-                  <WhatsAppIcon className="w-5 h-5 text-white" />
-                  <span>CHECK FARE &amp; BOOK NOW</span>
-                </a>
               </div>
             </div>
           </div>
@@ -790,7 +972,10 @@ export default function App() {
                   <div className="vehicle-body">
                     <h3>{v.name}</h3>
                     <div className="vehicle-price">
-                      From ₹{v.rate}/km <span>· min {v.minKm} km</span>
+                      One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', fontWeight: 500 }}>
+                      Local: ₹{v.localPackage?.baseFare} (8h / 100km)
                     </div>
                     <div className="vehicle-specs">
                       <span><UsersIcon className="w-3.5 h-3.5" />{v.seats} Seats</span>
@@ -809,6 +994,63 @@ export default function App() {
                       className="btn btn-primary btn-block"
                     >
                       <WhatsAppIcon /> Book Now
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ============ POPULAR ROUTES (4 CARDS SINGLE ROW LAYOUT) ============ */}
+        <section className="section popular-routes-section" id="popular-routes">
+          <div className="container">
+            <div className="section-head">
+              <div className="eyebrow"><span className="dot"></span>POPULAR ROUTES</div>
+              <h2>Explore our most <span className="title-gradient">requested travel routes</span></h2>
+              <p>Direct door-to-door drops, 24×7 airport transfers, and long-distance intercity rides at transparent fixed fares.</p>
+            </div>
+
+            <div className="popular-routes-grid" id="popularRoutesGrid">
+              {POPULAR_ROUTE_CARDS.map((cat) => (
+                <div key={cat.id} className="popular-route-card" id={`popular-route-${cat.id}`}>
+                  <div className="popular-route-card-header">
+                    <div className="popular-route-title-row">
+                      <div className="popular-route-icon-box">
+                        <PinIcon className="popular-route-loc-icon" />
+                      </div>
+                      <h3 className="popular-route-title">{cat.category}</h3>
+                    </div>
+                    {cat.badge && <span className="popular-route-badge">{cat.badge}</span>}
+                  </div>
+
+                  <div className="popular-route-list">
+                    {cat.routes.map((r, rIdx) => (
+                      <button
+                        key={rIdx}
+                        type="button"
+                        className="popular-route-item"
+                        onClick={() => handleSelectPopularRoute(r.from, r.to)}
+                        title={`Click to set pickup: ${r.from} and drop: ${r.to}`}
+                      >
+                        <div className="popular-route-item-left">
+                          <span className="route-bullet"></span>
+                          <span className="route-label-text">{r.label}</span>
+                        </div>
+                        <span className="route-select-tag">Book ➔</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="popular-route-footer">
+                    <a
+                      href={getPopularRouteWhatsAppUrl(cat.category)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="popular-route-view-all"
+                      id={`view-all-${cat.id}`}
+                    >
+                      <span>{cat.actionText}</span>
                     </a>
                   </div>
                 </div>
@@ -886,11 +1128,11 @@ export default function App() {
                     </button>
                     <button
                       type="button"
-                      className={tripType === 'rental' ? 'active' : ''}
-                      onClick={() => setTripType('rental')}
-                      id="btnTripRental"
+                      className={tripType === 'local' ? 'active' : ''}
+                      onClick={() => setTripType('local')}
+                      id="btnTripLocal"
                     >
-                      Rental
+                      Local Trip (8h/100km)
                     </button>
                   </div>
                 </div>
@@ -903,15 +1145,22 @@ export default function App() {
                     value={selectedVehicleIndex}
                     onChange={(e) => setSelectedVehicleIndex(Number(e.target.value))}
                   >
-                    {VEHICLES.map((v, i) => (
-                      <option key={v.id} value={i}>
-                        {v.name} — ₹{v.rate}/km
-                      </option>
-                    ))}
+                    {VEHICLES.map((v, i) => {
+                      const label = tripType === 'local'
+                        ? `${v.name} — ₹${v.localPackage?.baseFare} (8h / 100km)`
+                        : tripType === 'roundtrip'
+                          ? `${v.name} — ₹${v.roundRate}/km`
+                          : `${v.name} — ₹${v.onewayRate}/km`;
+                      return (
+                        <option key={v.id} value={i}>
+                          {label}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
-                <div className="form-row">
+                {tripType !== 'local' ? (
                   <div className="form-group">
                     <label htmlFor="distanceInput">Distance (KM)</label>
                     <input
@@ -921,44 +1170,66 @@ export default function App() {
                       onChange={(e) => setDistanceKm(Number(e.target.value))}
                       className="input"
                       id="distanceInput"
+                      placeholder="e.g. 120"
                     />
+                    <div style={{ fontSize: '12.5px', color: '#64748B', marginTop: '6px', lineHeight: 1.4 }}>
+                      {tripType === 'oneway' ? (
+                        <span>Rate: <strong>₹{currentVehicle.onewayRate}/km</strong> (Sedan ₹15 · SUV ₹19 · Innova/Crysta ₹20)</span>
+                      ) : (
+                        <span>Rate: <strong>₹{currentVehicle.roundRate}/km</strong> (Sedan ₹13 · SUV ₹18 · Innova/Crysta ₹22) · Round distance billed</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="daysInput">No. of Days</label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={numDays}
-                      onChange={(e) => setNumDays(Number(e.target.value))}
-                      className="input"
-                      id="daysInput"
-                    />
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div style={{
+                      padding: '12px 14px',
+                      background: '#F0FDF4',
+                      border: '1px solid #BBF7D0',
+                      borderRadius: '12px',
+                      marginBottom: '16px',
+                      fontSize: '13px',
+                      color: '#166534',
+                      lineHeight: 1.5
+                    }}>
+                      <div style={{ fontWeight: 700, marginBottom: '2px' }}>✓ Included in Base Package: 8 Hours &amp; 100 KM</div>
+                      <div>Base Fare: <strong>₹{currentVehicle.localPackage?.baseFare || 2000}</strong> (Sedan ₹2,000 · SUV ₹2,800 · Innova ₹3,500)</div>
+                    </div>
 
-                <div className="form-group">
-                  <div className="checkbox-row" onClick={() => setNightStay(!nightStay)}>
-                    <input
-                      type="checkbox"
-                      id="nightStay"
-                      checked={nightStay}
-                      onChange={(e) => setNightStay(e.target.checked)}
-                    />
-                    <label htmlFor="nightStay">Include Night Stay Charges</label>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <div className="checkbox-row" onClick={() => setDriverAllowance(!driverAllowance)}>
-                    <input
-                      type="checkbox"
-                      id="driverAllowance"
-                      checked={driverAllowance}
-                      onChange={(e) => setDriverAllowance(e.target.checked)}
-                    />
-                    <label htmlFor="driverAllowance">Include Driver Allowance (Bata)</label>
-                  </div>
-                </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="extraKmInput">Extra KM</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={extraKm}
+                          onChange={(e) => setExtraKm(Number(e.target.value))}
+                          className="input"
+                          id="extraKmInput"
+                          placeholder="0"
+                        />
+                        <span style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', display: 'block' }}>
+                          +₹{currentVehicle.localPackage?.extraKmRate || 14}/km extra
+                        </span>
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="extraHoursInput">Extra Waiting (Hours)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={extraHours}
+                          onChange={(e) => setExtraHours(Number(e.target.value))}
+                          className="input"
+                          id="extraHoursInput"
+                          placeholder="0"
+                        />
+                        <span style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', display: 'block' }}>
+                          +₹{currentVehicle.localPackage?.waitingPerHour || 150}/hr waiting
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <button
                   type="button"
@@ -972,31 +1243,75 @@ export default function App() {
               <div className="calc-result">
                 <h4>Estimated Fare Breakdown</h4>
                 <div className="result-rows">
-                  <div className="result-row">
-                    <span>Base Trip Fare</span>
-                    <span id="rFare">{formatINR(calculation.baseFare)}</span>
-                  </div>
-                  <div className="result-row">
-                    <span>Driver Bata</span>
-                    <span id="rBata">{formatINR(calculation.bata)}</span>
-                  </div>
-                  <div className="result-row">
-                    <span>Night Stay Charges</span>
-                    <span id="rNight">{formatINR(calculation.night)}</span>
-                  </div>
-                  <div className="result-row">
-                    <span>Toll &amp; Parking (est.)</span>
-                    <span id="rToll">{formatINR(calculation.toll)}</span>
-                  </div>
-                  <div className="result-row">
-                    <span>GST (5%)</span>
-                    <span id="rGst">{formatINR(calculation.gst)}</span>
-                  </div>
+                  {tripType === 'local' ? (
+                    <>
+                      <div className="result-row">
+                        <span>Trip Type</span>
+                        <span id="rTripType">Local Package (8h / 100km)</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Selected Vehicle</span>
+                        <span id="rVehicle">{currentVehicle.name}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Base Package (8h / 100km)</span>
+                        <span id="rBaseFare">{formatINR(calculation.baseFare)}</span>
+                      </div>
+                      {calculation.extraKm ? (
+                        <div className="result-row">
+                          <span>Extra Distance ({calculation.extraKm} km @ ₹{calculation.pkg?.extraKmRate}/km)</span>
+                          <span id="rExtraKm">{formatINR(calculation.extraKmCost || 0)}</span>
+                        </div>
+                      ) : null}
+                      {calculation.extraHours ? (
+                        <div className="result-row">
+                          <span>Extra Waiting ({calculation.extraHours} hr @ ₹{calculation.pkg?.waitingPerHour}/hr)</span>
+                          <span id="rExtraHours">{formatINR(calculation.extraWaitingCost || 0)}</span>
+                        </div>
+                      ) : null}
+                      <div className="result-row">
+                        <span>Toll &amp; Parking</span>
+                        <span id="rTollExtra" style={{ color: '#FCD34D' }}>Extra</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="result-row">
+                        <span>Trip Type</span>
+                        <span id="rTripType">{tripType === 'oneway' ? 'One Way Drop' : 'Round Trip'}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Selected Vehicle</span>
+                        <span id="rVehicle">{currentVehicle.name}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Rate per KM</span>
+                        <span id="rRate">₹{calculation.ratePerKm}/km</span>
+                      </div>
+                      <div className="result-row">
+                        <span>{tripType === 'roundtrip' ? 'Round Distance Billed' : 'Billed Distance'}</span>
+                        <span id="rBilledKm">{calculation.billedKm} KM {tripType === 'roundtrip' ? `(${distanceKm} km × 2)` : ''}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Base Trip Fare</span>
+                        <span id="rBaseFare">{formatINR(calculation.baseFare)}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Toll &amp; Parking</span>
+                        <span id="rTollExtra" style={{ color: '#FCD34D' }}>Extra</span>
+                      </div>
+                    </>
+                  )}
                 </div>
+
                 <div className="result-total">
-                  <span>Final Estimate</span>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span>Final Estimate</span>
+                    <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400 }}>+ Toll &amp; Parking Extra</span>
+                  </div>
                   <span id="rTotal">{formatINR(calculation.total)}</span>
                 </div>
+
                 <a
                   href={getWhatsAppQuoteUrl()}
                   target="_blank"
@@ -1007,7 +1322,7 @@ export default function App() {
                   <WhatsAppIcon /> Generate WhatsApp Quote
                 </a>
                 <p className="result-note">
-                  *This is an estimated fare based on standard rates. Final price may vary depending on actual route, traffic, waiting time and season. Toll, parking &amp; state permit charges (if any) are extra.
+                  *This is an estimated fare based on standard rates. Toll, parking, and permit charges (if any) are extra. Zero hidden charges.
                 </p>
               </div>
             </div>
@@ -1101,7 +1416,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div>
+              <div className="about-story">
                 <div className="about-block">
                   <h3><BookIcon /> Our Story</h3>
                   <p>What began as a single Swift Dzire ferrying families between Hosur and Bangalore has grown into a full premium fleet — Innova Crysta, Tempo Travellers and more — built on the same promise of punctual, courteous service.</p>
@@ -1276,11 +1591,8 @@ export default function App() {
           <div className="footer-top">
             <div>
               <div className="footer-logo">
-                <img className="brand-image" src={brandLogo} alt="TKV Drop Taxi" />
+                <img src={brandLogo} alt="TKV Drop Taxi Logo" className="logo-mark" />
               </div>
-              <p>
-                #1 Outstation drop taxi, round trips &amp; airport transfers across Hosur, Krishnagiri, Bangalore, Chennai and Tamil Nadu — Zero Return Fare.
-              </p>
               <div className="social-row">
                 <a href={CONFIG.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                   <FacebookIcon />
@@ -1358,7 +1670,7 @@ export default function App() {
           </div>
 
           <div className="footer-bottom">
-            <span>© {currentYear} TKV Drop Taxi. All rights reserved.</span>
+            <span>© {currentYear}. All rights reserved.</span>
             <div className="legal-links">
               <a href="#home">Privacy Policy</a>
               <a href="#home">Terms of Service</a>

@@ -1,3 +1,11 @@
+export interface LocalPackage {
+  baseFare: number;
+  baseKm: number;
+  baseHours: number;
+  extraKmRate: number;
+  waitingPerHour: number;
+}
+
 export interface Vehicle {
   id: string;
   name: string;
@@ -7,6 +15,9 @@ export interface Vehicle {
   ac: boolean;
   type: 'sedan' | 'suv' | 'tempo' | 'bus';
   rate: number;
+  onewayRate: number;
+  roundRate: number;
+  localPackage?: LocalPackage;
   minKm: number;
   badge?: string;
   image: string;
@@ -120,11 +131,20 @@ export const VEHICLES: Vehicle[] = [
     fuel: "Diesel",
     ac: true,
     type: "sedan",
-    rate: 14,
+    rate: 15,
+    onewayRate: 15,
+    roundRate: 13,
+    localPackage: {
+      baseFare: 2000,
+      baseKm: 100,
+      baseHours: 8,
+      extraKmRate: 14,
+      waitingPerHour: 150
+    },
     minKm: 250,
-    badge: "Best Value",
-    image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1590362891991-f776e747a588?q=80&w=800&auto=format&fit=crop",
+    badge: "Best Value Sedan",
+    image: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=900&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=900&auto=format&fit=crop",
     features: ["Swift Dzire Sedan", "Top Fuel Economy", "AC & Music System"]
   },
   {
@@ -136,40 +156,43 @@ export const VEHICLES: Vehicle[] = [
     ac: true,
     type: "sedan",
     rate: 15,
+    onewayRate: 15,
+    roundRate: 13,
+    localPackage: {
+      baseFare: 2000,
+      baseKm: 100,
+      baseHours: 8,
+      extraKmRate: 14,
+      waitingPerHour: 150
+    },
     minKm: 250,
-    image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=900&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=900&auto=format&fit=crop",
     features: ["Toyota Etios Sedan", "Spacious 592L Boot", "Smooth Highway Ride"]
   },
   {
     id: "ertiga",
-    name: "Maruti Ertiga",
+    name: "Maruti Ertiga (SUV)",
     seats: 6,
     luggage: "3 Bags",
     fuel: "Diesel",
     ac: true,
     type: "suv",
-    rate: 16,
+    rate: 19,
+    onewayRate: 19,
+    roundRate: 18,
+    localPackage: {
+      baseFare: 2800,
+      baseKm: 100,
+      baseHours: 8,
+      extraKmRate: 17,
+      waitingPerHour: 180
+    },
     minKm: 250,
-    badge: "Budget 6-Seater",
-    image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1550355291-bbee04a92027?q=80&w=800&auto=format&fit=crop",
+    badge: "Popular SUV",
+    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=900&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=900&auto=format&fit=crop",
     features: ["Ertiga 6+1 Seater", "Flexible Seating", "Comfortable Suspension"]
-  },
-  {
-    id: "innova",
-    name: "Toyota Innova",
-    seats: 7,
-    luggage: "4 Bags",
-    fuel: "Diesel",
-    ac: true,
-    type: "suv",
-    rate: 18,
-    minKm: 300,
-    badge: "Family Favorite",
-    image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=800&auto=format&fit=crop",
-    features: ["Toyota Innova 7+1", "Extra Legroom", "Reliable Long Drives"]
   },
   {
     id: "crysta",
@@ -179,56 +202,21 @@ export const VEHICLES: Vehicle[] = [
     fuel: "Diesel",
     ac: true,
     type: "suv",
-    rate: 21,
+    rate: 20,
+    onewayRate: 20,
+    roundRate: 22,
+    localPackage: {
+      baseFare: 3500,
+      baseKm: 100,
+      baseHours: 8,
+      extraKmRate: 18,
+      waitingPerHour: 190
+    },
     minKm: 300,
     badge: "Executive Class",
-    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=900&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=900&auto=format&fit=crop",
     features: ["Innova Crysta Luxury", "Captain Leather Seats", "VIP Suspension"]
-  },
-  {
-    id: "tt12",
-    name: "Tempo Traveller 12 Seater",
-    seats: 12,
-    luggage: "8 Bags",
-    fuel: "Diesel",
-    ac: true,
-    type: "tempo",
-    rate: 26,
-    minKm: 300,
-    badge: "Group Tour",
-    image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop",
-    features: ["Force 12+1 Traveller", "Push-back Luxury Seats", "Surround Sound & AC"]
-  },
-  {
-    id: "tt17",
-    name: "Tempo Traveller 17 Seater",
-    seats: 17,
-    luggage: "10 Bags",
-    fuel: "Diesel",
-    ac: true,
-    type: "tempo",
-    rate: 26,
-    minKm: 300,
-    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop",
-    features: ["Force 17+1 Traveller", "Spacious Aisle", "Ideal for Family Convoys"]
-  },
-  {
-    id: "minibus",
-    name: "Mini Bus 25 Seater",
-    seats: 25,
-    luggage: "15 Bags",
-    fuel: "Diesel",
-    ac: true,
-    type: "bus",
-    rate: 30,
-    minKm: 300,
-    badge: "Events & Weddings",
-    image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop",
-    features: ["25 Seater AC Coach", "Large Luggage Bay", "Full Group Touring"]
   }
 ];
 
@@ -328,6 +316,70 @@ export const SERVICES: ServiceItem[] = [
     image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800&auto=format&fit=crop",
     fallbackImage: "https://images.unsplash.com/photo-1563720223185-11003d516935?q=80&w=800&auto=format&fit=crop",
     desc: "Dedicated vehicle & professional driver contract on a monthly basis."
+  }
+];
+
+export interface PopularRouteCard {
+  id: string;
+  category: string;
+  badge?: string;
+  routes: Array<{
+    from: string;
+    to: string;
+    label: string;
+    tag?: string;
+  }>;
+  actionText: string;
+}
+
+export const POPULAR_ROUTE_CARDS: PopularRouteCard[] = [
+  {
+    id: "airport",
+    category: "AIRPORT ROUTES",
+    badge: "24×7 Flight Timings",
+    routes: [
+      { from: "Hosur", to: "Bangalore Airport", label: "Hosur → Bangalore Airport", tag: "Express Route" },
+      { from: "Bangalore Airport", to: "Hosur", label: "Bangalore Airport → Hosur", tag: "Direct Drop" },
+      { from: "Bangalore Airport", to: "Chennai", label: "Bangalore Airport → Chennai", tag: "Highway Drop" },
+      { from: "Chennai", to: "Bangalore Airport", label: "Chennai → Bangalore Airport", tag: "Airport Drop" }
+    ],
+    actionText: "View All Routes →"
+  },
+  {
+    id: "drop-taxi",
+    category: "DROP TAXI ROUTES",
+    badge: "Pay Only One-Way",
+    routes: [
+      { from: "Hosur", to: "Bangalore", label: "Hosur → Bangalore", tag: "Daily Commute" },
+      { from: "Bangalore", to: "Hosur", label: "Bangalore → Hosur", tag: "Fast Pickup" },
+      { from: "Hosur", to: "Chennai", label: "Hosur → Chennai", tag: "Highway Ride" },
+      { from: "Chennai", to: "Hosur", label: "Chennai → Hosur", tag: "Return Drop" }
+    ],
+    actionText: "View All Routes →"
+  },
+  {
+    id: "long-distance",
+    category: "LONG-DISTANCE TRIPS",
+    badge: "No Return Toll",
+    routes: [
+      { from: "Hosur", to: "Anywhere in Tamil Nadu", label: "Hosur → Anywhere in Tamil Nadu", tag: "All Districts" },
+      { from: "Bangalore", to: "Anywhere in Tamil Nadu", label: "Bangalore → Anywhere in TN", tag: "Interstate" },
+      { from: "Chennai", to: "Anywhere in Tamil Nadu", label: "Chennai → Anywhere in TN", tag: "Statewide" },
+      { from: "Tamil Nadu", to: "Anywhere in India", label: "Tamil Nadu → Anywhere India", tag: "Long Haul" }
+    ],
+    actionText: "View All Routes →"
+  },
+  {
+    id: "all-india",
+    category: "ALL-INDIA TRAVEL",
+    badge: "Tourist Permit",
+    routes: [
+      { from: "Hosur", to: "All India", label: "Hosur → All India", tag: "Nationwide" },
+      { from: "Tamil Nadu", to: "All India", label: "Tamil Nadu → All India", tag: "All States" },
+      { from: "South India", to: "Interstate Outstation", label: "Interstate Outstation", tag: "Custom Tour" },
+      { from: "Any City", to: "One-Way & Round Trips", label: "One-Way & Round Trips", tag: "Flexible" }
+    ],
+    actionText: "View All Routes →"
   }
 ];
 

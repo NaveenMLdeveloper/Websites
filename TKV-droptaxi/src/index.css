@@ -167,17 +167,40 @@ h1, h2, h3, h4, h5 {
 }
 
 .section-head {
-  max-width: 680px;
+  max-width: 760px;
   margin: 0 auto 52px;
   text-align: center;
   position: relative;
+  padding: 18px 18px 8px;
+  isolation: isolate;
+}
+
+.section-head::before {
+  content: '';
+  position: absolute;
+  inset: 0 8% 6% 8%;
+  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.14), rgba(249, 115, 22, 0.08) 32%, transparent 70%);
+  filter: blur(18px);
+  z-index: -1;
 }
 
 .section-head h2 {
   font-size: clamp(26px, 4vw, 42px);
   margin-bottom: 14px;
   position: relative;
-  line-height: 1.22;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  text-shadow: 0 10px 30px rgba(30, 64, 175, 0.08);
+}
+
+.section-head h2::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 4px;
+  margin: 18px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(30, 64, 175, 0), rgba(30, 64, 175, 0.6), rgba(249, 115, 22, 0.7), rgba(30, 64, 175, 0));
 }
 
 .section-head p {
@@ -304,17 +327,12 @@ h1, h2, h3, h4, h5 {
 }
 
 .logo-mark {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-}
-
-.brand-image {
-  display: block;
   width: 180px;
-  height: 70px;
   max-width: 100%;
+  height: 70px;
+  flex-shrink: 0;
   object-fit: contain;
+  display: block;
 }
 
 .logo-text {
@@ -696,26 +714,58 @@ h1, h2, h3, h4, h5 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* ============ SIMPLIFIED BOOK YOUR RIDE CARD ============ */
+/* ============ SIMPLIFIED BOOK YOUR TAXI CARD (IMAGE BASED CAB SELECTION) ============ */
 .hero-clean-card {
   background: #FFFFFF;
   border: 1px solid #CBD5E1;
-  border-radius: 18px;
-  padding: 18px 22px;
-  box-shadow: 0 16px 36px -10px rgba(30, 64, 175, 0.12), 0 4px 14px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px -12px rgba(15, 61, 145, 0.18), 0 4px 16px rgba(0, 0, 0, 0.06);
   width: 100%;
-  max-width: 430px;
+  max-width: 440px;
   margin-left: auto;
   box-sizing: border-box;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hero-clean-card.pulse-glow {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.3), 0 24px 50px -10px rgba(37, 99, 235, 0.35);
+  animation: cardHighlight 1.5s ease;
+}
+
+@keyframes cardHighlight {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+.clean-card-header {
+  background: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%);
+  padding: 14px 18px 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .clean-card-title {
   font-family: 'Poppins', sans-serif;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
-  color: #1E40AF;
-  margin-bottom: 12px;
+  color: #FFFFFF;
   line-height: 1.2;
+  margin: 0;
+}
+
+.clean-card-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 3px 0 0;
+}
+
+.clean-card-body {
+  padding: 14px 16px 16px;
 }
 
 .clean-trip-tabs {
@@ -724,15 +774,15 @@ h1, h2, h3, h4, h5 {
   gap: 4px;
   background: #F1F5F9;
   padding: 3px;
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border-radius: 9px;
+  margin-bottom: 11px;
 }
 
 .clean-trip-tab {
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
-  padding: 6.5px 3px;
+  padding: 6.5px 2px;
   border-radius: 6px;
   border: none;
   background: transparent;
@@ -744,9 +794,10 @@ h1, h2, h3, h4, h5 {
 }
 
 .clean-trip-tab.active {
-  background: #1E40AF;
+  background: #0066CC;
   color: #FFFFFF;
-  box-shadow: 0 2px 5px rgba(30, 64, 175, 0.22);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.28);
 }
 
 .clean-form-fields {
@@ -762,11 +813,15 @@ h1, h2, h3, h4, h5 {
   gap: 2px;
 }
 
-.clean-field-group label {
+.clean-field-caps-label {
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 700;
   color: #334155;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  display: block;
 }
 
 .clean-input-wrap {
@@ -776,30 +831,46 @@ h1, h2, h3, h4, h5 {
   width: 100%;
 }
 
-.clean-input-icon {
+.clean-input-dot {
   position: absolute;
-  left: 10px;
-  width: 13.5px;
-  height: 13.5px;
+  left: 11px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
   pointer-events: none;
+  flex-shrink: 0;
+}
+
+.dot-green {
+  background-color: #16A34A;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.dot-red {
+  background-color: #DC2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
 }
 
 .clean-input, .clean-select {
   width: 100%;
-  padding: 7px 10px 7px 32px;
+  padding: 6.5px 10px;
   border: 1.5px solid #CBD5E1;
   border-radius: 8px;
   background: #FFFFFF;
-  font-size: 12.5px;
+  font-size: 12px;
   color: #0F172A;
   outline: none;
   transition: border-color 0.18s, box-shadow 0.18s;
   box-sizing: border-box;
 }
 
+.clean-input-with-dot {
+  padding-left: 28px;
+}
+
 .clean-input:focus, .clean-select:focus {
-  border-color: #1E40AF;
-  box-shadow: 0 0 0 2.5px rgba(30, 64, 175, 0.12);
+  border-color: #0066CC;
+  box-shadow: 0 0 0 2.5px rgba(0, 102, 204, 0.14);
 }
 
 .clean-fields-row {
@@ -808,32 +879,116 @@ h1, h2, h3, h4, h5 {
   gap: 8px;
 }
 
-.clean-check-fare-btn {
+/* ============ 4-CAB SELECTION CARDS ============ */
+.clean-cab-selector-block {
+  margin-top: 2px;
+}
+
+.select-cab-title {
+  margin-bottom: 4px;
+}
+
+.cab-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.cab-select-card {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 9px;
+  padding: 6px 3px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.cab-select-card:hover {
+  border-color: #93C5FD;
+  transform: translateY(-1px);
+}
+
+.cab-select-card.selected {
+  border-color: #0066CC;
+  background: #EFF6FF;
+  box-shadow: 0 3px 10px rgba(0, 102, 204, 0.18);
+}
+
+.cab-card-rate {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #D97706;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cab-card-img-box {
+  width: 100%;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  margin: 4px 0 2px;
+  overflow: hidden;
+}
+
+.cab-card-svg {
   width: 100%;
-  padding: 10.5px 14px;
-  border-radius: 10px;
-  background: #1E40AF;
+  height: 100%;
+  max-height: 52px;
+  object-fit: contain;
+  display: block;
+}
+
+.cab-card-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: #0F172A;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.cab-select-card.selected .cab-card-name {
+  color: #0066CC;
+}
+
+/* ============ GET ESTIMATION BUTTON ============ */
+.clean-get-estimation-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 9px;
+  background: #0066CC;
   color: #FFFFFF;
   font-family: 'Poppins', sans-serif;
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   border: none;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(30, 64, 175, 0.28);
+  box-shadow: 0 4px 14px rgba(0, 102, 204, 0.32);
   transition: all 0.18s ease;
   box-sizing: border-box;
 }
 
-.clean-check-fare-btn:hover {
-  background: #1D4ED8;
+.clean-get-estimation-btn:hover {
+  background: #0052A3;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(30, 64, 175, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 102, 204, 0.42);
 }
 
 @media (max-width: 1024px) {
@@ -855,15 +1010,20 @@ h1, h2, h3, h4, h5 {
     padding: 86px 0 24px;
   }
   .hero-clean-card {
-    padding: 16px 14px;
+    padding: 0;
   }
   .clean-fields-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
   }
-  .clean-trip-tab {
-    font-size: 10.5px;
-    padding: 6px 2px;
+  .cab-cards-grid {
+    gap: 4px;
+  }
+  .cab-card-rate {
+    font-size: 9px;
+  }
+  .cab-card-name {
+    font-size: 9px;
   }
 }
 
@@ -892,6 +1052,221 @@ h1, h2, h3, h4, h5 {
 
 @media (max-width: 600px) {
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ============ POPULAR ROUTES SECTION (4 CARDS SINGLE ROW) ============ */
+.popular-routes-section {
+  background: #FFFFFF;
+  padding: 72px 0 76px;
+  border-top: 1px solid #E2E8F0;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.popular-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+.popular-route-card {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.popular-route-card:hover {
+  transform: translateY(-5px);
+  border-color: #93C5FD;
+  box-shadow: 0 16px 32px -8px rgba(30, 64, 175, 0.15), 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.popular-route-card-header {
+  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+  padding: 16px 16px 13px;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.popular-route-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.popular-route-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+}
+
+.popular-route-loc-icon {
+  width: 15px;
+  height: 15px;
+  color: #FFFFFF;
+}
+
+.popular-route-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #1E40AF;
+  letter-spacing: 0.04em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.popular-route-badge {
+  display: inline-block;
+  align-self: flex-start;
+  background: rgba(30, 64, 175, 0.08);
+  color: #1E40AF;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2.5px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.popular-route-list {
+  padding: 14px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.popular-route-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  width: 100%;
+}
+
+.popular-route-item:hover {
+  background: #EFF6FF;
+  border-color: #3B82F6;
+  transform: translateX(2px);
+}
+
+.popular-route-item-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.route-bullet {
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+  background-color: #3B82F6;
+  flex-shrink: 0;
+}
+
+.route-label-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1E293B;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popular-route-item:hover .route-label-text {
+  color: #1E40AF;
+  font-weight: 700;
+}
+
+.route-select-tag {
+  font-family: 'Poppins', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #2563EB;
+  background: #DBEAFE;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.85;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.popular-route-item:hover .route-select-tag {
+  opacity: 1;
+  background: #1E40AF;
+  color: #FFFFFF;
+}
+
+.popular-route-footer {
+  padding: 10px 12px 14px;
+  border-top: 1px dashed #E2E8F0;
+  background: #FAFAFA;
+}
+
+.popular-route-view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 7px 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1E40AF;
+  background: #FFFFFF;
+  border: 1.2px solid #CBD5E1;
+  border-radius: 7px;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.popular-route-view-all:hover {
+  background: #1E40AF;
+  color: #FFFFFF;
+  border-color: #1E40AF;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.2);
+}
+
+@media (max-width: 1120px) {
+  .popular-routes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .popular-routes-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
 }
 
 /* ============ WHY CHOOSE US ============ */
@@ -1832,6 +2207,7 @@ h1, h2, h3, h4, h5 {
   grid-template-columns: .9fr 1.1fr;
   gap: 60px;
   align-items: start;
+  position: relative;
 }
 
 .about-visual {
@@ -1841,6 +2217,13 @@ h1, h2, h3, h4, h5 {
   padding: 40px;
   position: sticky;
   top: 110px;
+  align-self: start;
+  box-shadow: 0 22px 45px -28px rgba(30, 64, 175, 0.22);
+}
+
+.about-story {
+  position: relative;
+  padding-top: 6px;
 }
 
 .about-visual .num {
@@ -2095,9 +2478,13 @@ footer {
   margin-bottom: 16px;
 }
 
-.footer-logo .brand-image {
-  width: 190px;
-  height: 74px;
+.footer-logo .logo-mark {
+  width: 180px;
+  max-width: 100%;
+  height: 70px;
+  border-radius: 10px;
+  object-fit: contain;
+  display: block;
 }
 
 .footer-logo span {
@@ -2428,72 +2815,13 @@ footer {
   color: #fff;
 }
 
-/* Mobile layout safeguards */
-@media (max-width: 640px) {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  #root,
-  .container,
-  .hero-clean-section,
-  .hero-clean-grid,
-  .hero-left-content,
-  .hero-clean-card {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .container {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .nav {
-    gap: 12px;
-  }
-
-  .brand-image {
-    width: 150px;
-    height: 58px;
-  }
-
-  .hero-clean-section {
-    display: block;
-    padding: 86px 0 24px;
-  }
-
-  .hero-clean-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .hero-clean-card {
-    margin-left: 0;
-    padding: 16px 14px;
-  }
-
-  .hero-action-buttons {
-    grid-template-columns: 1fr;
-    max-width: none;
-  }
-}
 /* =======================================================
    MOBILE LAYOUT EMERGENCY PATCH
-   Append to the very end of src/index.css and rebuild.
    Fixes: content confined to ~50% viewport width on phones,
-   with blank space on the right (nav renders fine because
-   .nav-wrap is position:fixed and escapes normal flow —
-   everything else was stuck in a non-collapsing container).
+   with blank space on the right.
    ======================================================= */
 
-/* 1) Hard root-level safety net — independent of any specific
-      component class name, so it can't be missed by a wrapper
-      you don't know about yet. */
+/* 1) Hard root-level safety net */
 html, body, #root {
   width: 100% !important;
   max-width: 100vw !important;
@@ -2501,16 +2829,13 @@ html, body, #root {
   overflow-x: hidden !important;
 }
 #root {
-  display: block !important; /* overrides any leftover flex/grid on #root itself */
+  display: block !important;
 }
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-/* 2) Force every multi-column grid/flex section in this file to
-      stack on phones — including .contact-grid, which had NO
-      mobile override anywhere in the current CSS and will break
-      the Contact page the same way once you get there. */
+/* 2) Force every multi-column grid/flex section to stack on phones */
 @media (max-width: 768px) {
   .hero-clean-grid,
   .why-split-grid,
@@ -2542,12 +2867,11 @@ html, body, #root {
   }
 }
 
-/* 3) Belt-and-braces: nothing in the tree should ever be wider
-      than the viewport, even if a future component forgets to
-      account for mobile. */
+/* 3) Belt-and-braces: prevent elements exceeding viewport width */
 @media (max-width: 640px) {
   main, section, .section, .container {
     max-width: 100vw !important;
     overflow-x: hidden;
   }
 }
+
