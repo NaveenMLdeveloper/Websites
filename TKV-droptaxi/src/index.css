@@ -2875,3 +2875,14 @@ html, body, #root {
   }
 }
 
+
+@media (max-width: 1024px) {
+  .hero-clean-section {
+    padding-top: 116px;
+  }
+}
+@media (max-width: 640px) {
+  .hero-clean-section {
+    padding-top: 116px;
+  }
+}
