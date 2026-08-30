@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# Temporary deployment URL: update this file after the permanent custom domain is purchased.
-Sitemap: https://websites.naveenpalani75.workers.dev/sitemap.xml
+Sitemap: https://tkvdroptaxi.com/sitemap.xml

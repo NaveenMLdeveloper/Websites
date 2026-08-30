@@ -253,8 +253,8 @@ export default function App() {
 
   // Scroll listener for sticky navbar & active section highlighting
   useEffect(() => {
-    const siteTitle = 'TKV Drop Taxi | Hosur Taxi & Airport Transfers';
-    const defaultDescription = 'TKV Drop Taxi provides reliable one-way drop taxi, airport pickup and drop, outstation taxi, and round-trip travel from Hosur to Bangalore, Chennai, Tamil Nadu, and all India.';
+    const siteTitle = 'TKV Drop Taxi | One Way Drop Taxi in Hosur & Bangalore';
+    const defaultDescription = 'Book reliable one-way drop taxi services from Hosur to Bangalore and across Tamil Nadu with TKV Drop Taxi. Affordable fares, comfortable cars and easy WhatsApp booking.';
 
     document.title = siteTitle;
 
@@ -265,7 +265,7 @@ export default function App() {
 
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) {
-      canonical.setAttribute('href', CONFIG.siteUrl + '/');
+      canonical.setAttribute('href', 'https://tkvdroptaxi.com/');
     }
 
     const ogTitle = document.querySelector('meta[property="og:title"]');
@@ -275,17 +275,17 @@ export default function App() {
 
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) {
-      ogDescription.setAttribute('content', defaultDescription);
+      ogDescription.setAttribute('content', 'Book reliable one-way drop taxi services from Hosur to Bangalore and across Tamil Nadu with TKV Drop Taxi.');
     }
 
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) {
-      ogUrl.setAttribute('content', CONFIG.siteUrl + '/');
+      ogUrl.setAttribute('content', 'https://tkvdroptaxi.com/');
     }
 
     const ogImage = document.querySelector('meta[property="og:image"]');
     if (ogImage) {
-      ogImage.setAttribute('content', CONFIG.siteUrl + CONFIG.logoPath);
+      ogImage.setAttribute('content', 'https://tkvdroptaxi.com/images/logo/main.png');
     }
 
     const twitterTitle = document.querySelector('meta[name="twitter:title"]');
@@ -295,12 +295,12 @@ export default function App() {
 
     const twitterDescription = document.querySelector('meta[name="twitter:description"]');
     if (twitterDescription) {
-      twitterDescription.setAttribute('content', defaultDescription);
+      twitterDescription.setAttribute('content', 'Book reliable one-way drop taxi services from Hosur to Bangalore and across Tamil Nadu with TKV Drop Taxi.');
     }
 
     const twitterImage = document.querySelector('meta[name="twitter:image"]');
     if (twitterImage) {
-      twitterImage.setAttribute('content', CONFIG.siteUrl + CONFIG.logoPath);
+      twitterImage.setAttribute('content', 'https://tkvdroptaxi.com/images/logo/main.png');
     }
 
     const structuredData = [
@@ -308,21 +308,21 @@ export default function App() {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: CONFIG.businessName,
-        url: CONFIG.siteUrl,
+        url: 'https://tkvdroptaxi.com/',
         description: 'TKV Drop Taxi provides reliable taxi services from Hosur to Bangalore, Chennai, Tamil Nadu, and all India.',
         potentialAction: {
           '@type': 'SearchAction',
-          target: `${CONFIG.siteUrl}/?q={search_term_string}`,
+          target: 'https://tkvdroptaxi.com/?q={search_term_string}',
           'query-input': 'required name=search_term_string'
         }
       },
       {
         '@context': 'https://schema.org',
-        '@type': 'LocalBusiness',
+        '@type': 'TaxiService',
         name: CONFIG.businessName,
-        image: CONFIG.siteUrl + CONFIG.logoPath,
-        telephone: CONFIG.phoneFormatted,
-        url: CONFIG.siteUrl,
+        image: 'https://tkvdroptaxi.com/images/logo/main.png',
+        telephone: '+91 97862 84326',
+        url: 'https://tkvdroptaxi.com/',
         address: {
           '@type': 'PostalAddress',
           streetAddress: '2nd Cross Narashamma Colony, Krishnagiri ByePass Road, Suzuki Showroom back Side',
@@ -337,7 +337,6 @@ export default function App() {
           'Tamil Nadu',
           'All India'
         ],
-        priceRange: '₹₹',
         description: 'TKV Drop Taxi provides one-way drop taxi, airport pickup and drop, outstation taxi, and long-distance travel from Hosur to Bangalore, Chennai, Salem, and across India.',
         sameAs: [
           'https://www.facebook.com/share/p/1BeGsCAgXS/'
@@ -345,7 +344,7 @@ export default function App() {
         contactPoint: {
           '@type': 'ContactPoint',
           contactType: 'customer support',
-          telephone: CONFIG.phoneFormatted,
+          telephone: '+91 97862 84326',
           areaServed: 'IN',
           availableLanguage: ['English', 'Tamil']
         }
@@ -683,7 +682,7 @@ export default function App() {
                 </div>
 
                 <h1 className="hero-clean-headline">
-                  <span className="hero-headline-accent">Hosur Taxi</span> &amp; Drop Taxi Service
+                  One Way Drop Taxi from <span className="hero-headline-accent">Hosur to Bangalore</span>
                 </h1>
 
                 <p className="hero-clean-lead">

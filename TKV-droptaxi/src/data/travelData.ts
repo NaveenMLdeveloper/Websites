@@ -126,11 +126,10 @@ export const CONFIG = {
     longitude: 77.8204
   },
   mapEmbedUrl: "https://maps.google.com/maps?q=Hosur%2C%20Tamil%20Nadu&t=&z=12&ie=UTF8&iwloc=&output=embed",
-  siteUrl: "https://websites.naveenpalani75.workers.dev",
+  siteUrl: "https://tkvdroptaxi.com",
   logoPath: "/images/logo/main.png",
   socialImage: "/images/logo/main.png",
-  // Update this value after the permanent custom domain is purchased.
-  domainNote: "Temporary Workers.dev URL in use until the custom domain is purchased."
+  domainNote: "Production domain configured for TKV Drop Taxi."
 };
 
 export const VEHICLES: Vehicle[] = [
