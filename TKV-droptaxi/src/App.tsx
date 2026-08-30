@@ -53,7 +53,7 @@ const CAB_SELECTION_OPTIONS = [
     name: 'SEDAN',
     subtitle: 'Swift Dzire',
     onewayRate: 15,
-    roundRate: 13,
+    roundRate: 14,
     localPackage: { baseFare: 2000, baseKm: 100, baseHours: 8, extraKmRate: 14, waitingPerHour: 150 },
     seats: 4,
     image: '/images/vehicles/Sedan.png'
@@ -63,7 +63,7 @@ const CAB_SELECTION_OPTIONS = [
     name: 'ETIOS',
     subtitle: 'Toyota Etios',
     onewayRate: 15,
-    roundRate: 13,
+    roundRate: 14,
     localPackage: { baseFare: 2000, baseKm: 100, baseHours: 8, extraKmRate: 14, waitingPerHour: 150 },
     seats: 4,
     image: '/images/vehicles/Toyota%20Etios.png'
@@ -72,8 +72,8 @@ const CAB_SELECTION_OPTIONS = [
     id: 'ertiga',
     name: 'SUV',
     subtitle: 'Maruti Ertiga',
-    onewayRate: 19,
-    roundRate: 18,
+    onewayRate: 20,
+    roundRate: 19,
     localPackage: { baseFare: 2800, baseKm: 100, baseHours: 8, extraKmRate: 17, waitingPerHour: 180 },
     seats: 6,
     image: '/images/vehicles/SUV.png'
@@ -82,8 +82,8 @@ const CAB_SELECTION_OPTIONS = [
     id: 'crysta',
     name: 'INNOVA',
     subtitle: 'Innova Crysta',
-    onewayRate: 20,
-    roundRate: 22,
+    onewayRate: 21,
+    roundRate: 20,
     localPackage: { baseFare: 3500, baseKm: 100, baseHours: 8, extraKmRate: 18, waitingPerHour: 190 },
     seats: 7,
     image: '/images/vehicles/Toyota%20Innova.png'
@@ -1287,9 +1287,9 @@ export default function App() {
                     />
                     <div style={{ fontSize: '12.5px', color: '#64748B', marginTop: '6px', lineHeight: 1.4 }}>
                       {tripType === 'oneway' ? (
-                        <span>Rate: <strong>₹{currentVehicle.onewayRate}/km</strong> (Sedan ₹15 · SUV ₹19 · Innova/Crysta ₹20)</span>
+                        <span>Rate: <strong>₹{currentVehicle.onewayRate}/km</strong> (Sedan ₹15 · SUV ₹20 · Innova/Crysta ₹21)</span>
                       ) : (
-                        <span>Rate: <strong>₹{currentVehicle.roundRate}/km</strong> (Sedan ₹13 · SUV ₹18 · Innova/Crysta ₹22) · Round distance billed</span>
+                        <span>Rate: <strong>₹{currentVehicle.roundRate}/km</strong> (Sedan ₹14 · SUV ₹19 · Innova/Crysta ₹20) · Round distance billed</span>
                       )}
                     </div>
                   </div>
@@ -1383,6 +1383,10 @@ export default function App() {
                         </div>
                       ) : null}
                       <div className="result-row">
+                        <span>Driver Bata</span>
+                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>Extra</span>
+                      </div>
+                      <div className="result-row">
                         <span>Toll &amp; Parking</span>
                         <span id="rTollExtra" style={{ color: '#FCD34D' }}>Extra</span>
                       </div>
@@ -1408,6 +1412,10 @@ export default function App() {
                       <div className="result-row">
                         <span>Base Trip Fare</span>
                         <span id="rBaseFare">{formatINR(calculation.baseFare)}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Driver Bata</span>
+                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>Extra</span>
                       </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>

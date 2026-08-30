@@ -144,7 +144,7 @@ export const VEHICLES: Vehicle[] = [
     type: "sedan",
     rate: 15,
     onewayRate: 15,
-    roundRate: 13,
+    roundRate: 14,
     localPackage: {
       baseFare: 2000,
       baseKm: 100,
@@ -154,8 +154,8 @@ export const VEHICLES: Vehicle[] = [
     },
     minKm: 250,
     badge: "Best Value Sedan",
-    image: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=900&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=900&auto=format&fit=crop",
+    image: "/images/vehicles/Swift Dzire.png",
+    fallbackImage: "/images/vehicles/Swift Dzire.png",
     features: ["Swift Dzire Sedan", "Top Fuel Economy", "AC & Music System"]
   },
   {
@@ -168,7 +168,7 @@ export const VEHICLES: Vehicle[] = [
     type: "sedan",
     rate: 15,
     onewayRate: 15,
-    roundRate: 13,
+    roundRate: 14,
     localPackage: {
       baseFare: 2000,
       baseKm: 100,
@@ -177,8 +177,8 @@ export const VEHICLES: Vehicle[] = [
       waitingPerHour: 150
     },
     minKm: 250,
-    image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=900&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=900&auto=format&fit=crop",
+    image: "/images/vehicles/Toyota Etios-style sedan.png",
+    fallbackImage: "/images/vehicles/Toyota Etios-style sedan.png",    
     features: ["Toyota Etios Sedan", "Spacious 592L Boot", "Smooth Highway Ride"]
   },
   {
@@ -189,9 +189,9 @@ export const VEHICLES: Vehicle[] = [
     fuel: "Diesel",
     ac: true,
     type: "suv",
-    rate: 19,
-    onewayRate: 19,
-    roundRate: 18,
+    rate: 20,
+    onewayRate: 20,
+    roundRate: 19,
     localPackage: {
       baseFare: 2800,
       baseKm: 100,
@@ -201,8 +201,8 @@ export const VEHICLES: Vehicle[] = [
     },
     minKm: 250,
     badge: "Popular SUV",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=900&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=900&auto=format&fit=crop",
+    image: "/images/vehicles/Maruti Ertiga.png",
+    fallbackImage: "/images/vehicles/Maruti Ertiga.png",
     features: ["Ertiga 6+1 Seater", "Flexible Seating", "Comfortable Suspension"]
   },
   {
@@ -213,9 +213,9 @@ export const VEHICLES: Vehicle[] = [
     fuel: "Diesel",
     ac: true,
     type: "suv",
-    rate: 20,
-    onewayRate: 20,
-    roundRate: 22,
+    rate: 21,
+    onewayRate: 21,
+    roundRate: 20,
     localPackage: {
       baseFare: 3500,
       baseKm: 100,
@@ -225,8 +225,8 @@ export const VEHICLES: Vehicle[] = [
     },
     minKm: 300,
     badge: "Executive Class",
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=900&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=900&auto=format&fit=crop",
+    image: "/images/vehicles/Innova Crysta.png",
+    fallbackImage: "/images/vehicles/Innova Crysta.png",
     features: ["Innova Crysta Luxury", "Captain Leather Seats", "VIP Suspension"]
   }
 ];
