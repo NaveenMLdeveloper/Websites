@@ -112,14 +112,25 @@ export const POPULAR_DISTANCES: Record<string, number> = {
 };
 
 export const CONFIG = {
+  businessName: "TKV Drop Taxi",
   phone: "+919786284326",
   phoneFormatted: "+91 97862 84326",
   whatsapp: "919786284326",
   email: "info@tkvdroptaxi.com",
   facebookUrl: "https://www.facebook.com/share/p/1BeGsCAgXS/",
   defaultWaMessage: "Hi TKV Drop Taxi, I'd like to book a cab. Please share availability and fare estimation.",
-  address: "Krishnagiri ByePass Road, Near Bus Stand, Hosur, Tamil Nadu - 635109",
-  mapEmbedUrl: "https://maps.google.com/maps?q=Hosur%2C%20Tamil%20Nadu&t=&z=12&ie=UTF8&iwloc=&output=embed"
+  address: "2nd Cross Narashamma Colony, Krishnagiri ByePass Road, Suzuki Showroom back Side, Hosur - 635109",
+  addressShort: "Hosur, Tamil Nadu",
+  geo: {
+    latitude: 12.7407,
+    longitude: 77.8204
+  },
+  mapEmbedUrl: "https://maps.google.com/maps?q=Hosur%2C%20Tamil%20Nadu&t=&z=12&ie=UTF8&iwloc=&output=embed",
+  siteUrl: "https://websites.naveenpalani75.workers.dev",
+  logoPath: "/images/logo/main.png",
+  socialImage: "/images/logo/main.png",
+  // Update this value after the permanent custom domain is purchased.
+  domainNote: "Temporary Workers.dev URL in use until the custom domain is purchased."
 };
 
 export const VEHICLES: Vehicle[] = [
