@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, FormEvent } from 'react';
+import React, { useState, useEffect, useMemo, useRef, FormEvent } from 'react';
 import {
   CONFIG,
   VEHICLES,
@@ -120,6 +120,10 @@ export default function App() {
   const [contactName, setContactName] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [contactTrip, setContactTrip] = useState('');
+
+  const fleetScrollRef = useRef<HTMLDivElement | null>(null);
+  const routesScrollRef = useRef<HTMLDivElement | null>(null);
+  const reviewsScrollRef = useRef<HTMLDivElement | null>(null);
   const [showToast, setShowToast] = useState(false);
 
   // Animated counters
@@ -252,6 +256,62 @@ export default function App() {
   };
 
   // Scroll listener for sticky navbar & active section highlighting
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reducedMotion) {
+      document.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -30px 0px'
+    });
+
+    document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const section = document.getElementById('home');
+    if (!section) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 768;
+    if (reducedMotion) {
+      section.style.setProperty('--hero-shift', '0px');
+      return;
+    }
+
+    let frame = 0;
+    const updateParallax = () => {
+      const rect = section.getBoundingClientRect();
+      const shift = Math.max(-18, Math.min(18, rect.top * -0.06));
+      section.style.setProperty('--hero-shift', `${shift}px`);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateParallax);
+    };
+
+    updateParallax();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
   useEffect(() => {
     const siteTitle = 'TKV Drop Taxi | One Way Drop Taxi in Hosur & Bangalore';
     const defaultDescription = 'Book reliable one-way drop taxi services from Hosur to Bangalore and across Tamil Nadu with TKV Drop Taxi. Affordable fares, comfortable cars and easy WhatsApp booking.';
@@ -676,21 +736,21 @@ export default function App() {
             <div className="hero-clean-grid">
               {/* Left Column: Hero Content & Car Visual */}
               <div className="hero-left-content">
-                <div className="hero-clean-badge">
+                <div className="hero-clean-badge hero-animate-1">
                   <span className="clean-dot"></span>
                   TKV Drop Taxi Hosur · 15+ Years of Trust
                 </div>
 
-                <h1 className="hero-clean-headline">
+                <h1 className="hero-clean-headline hero-animate-2">
                   One Way Drop Taxi from <span className="hero-headline-accent">Hosur to Bangalore</span>
                 </h1>
 
-                <p className="hero-clean-lead">
+                <p className="hero-clean-lead hero-animate-3">
                   Reliable one-way taxi, airport pickup and drop, and outstation rides from Hosur to Bangalore, Chennai, Tamil Nadu and all India with transparent fares and 24x7 support.
                 </p>
 
                 {/* 3 Clean Icon Features from reference image */}
-                <div className="hero-clean-features">
+                <div className="hero-clean-features hero-animate-4">
                   <div className="clean-feature-item">
                     <div className="clean-feature-icon">
                       <UserIcon className="w-4 h-4 text-white" />
@@ -714,7 +774,7 @@ export default function App() {
                 </div>
 
                 {/* Interactive Action Buttons with animated effects */}
-                <div className="hero-action-buttons">
+                <div className="hero-action-buttons hero-animate-5">
                   <a
                     href={`tel:${CONFIG.phone}`}
                     className="hero-action-btn hero-call-action-btn"
@@ -757,7 +817,7 @@ export default function App() {
               </div>
 
               {/* Right Column: Image-Based "Book Your Taxi Now" Card (as in reference image) */}
-              <div className="hero-clean-card" id="heroBookingCard">
+              <div className="hero-clean-card hero-animate-6" id="heroBookingCard">
                 <div className="clean-card-header">
                   <h2 className="clean-card-title">Book Your Taxi Now</h2>
                   <p className="clean-card-subtitle">Get instant estimation on WhatsApp</p>
@@ -959,24 +1019,18 @@ export default function App() {
         </section>
 
         {/* ============ WHY CHOOSE US ============ */}
-        <section className="section why-section" id="why">
+        <section className="section why-section" id="why" data-reveal>
           <div className="container">
             <div className="why-split-grid">
               {/* Left Media Column with Badge */}
               <div className="why-media-col">
                 <div className="why-image-card">
                   <img
-                    src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1200&auto=format&fit=crop"
+                    src="images/home/family.png"
                     alt="Comfortable family and passenger travel with TKV Drop Taxi"
                     className="why-hero-photo"
                     loading="lazy"
                     referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (target.src !== 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1200&auto=format&fit=crop') {
-                        target.src = 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1200&auto=format&fit=crop';
-                      }
-                    }}
                   />
                   <div className="why-trust-badge">
                     <span className="badge-highlight">10+</span>
@@ -998,7 +1052,7 @@ export default function App() {
                 </p>
 
                 <div className="why-points-list">
-                  <div className="why-point-row">
+                  <div className="why-point-row" data-reveal style={{ transitionDelay: '80ms' }}>
                     <div className="why-point-check">
                       <CheckCircleIcon className="check-svg" />
                     </div>
@@ -1008,7 +1062,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="why-point-row">
+                  <div className="why-point-row" data-reveal style={{ transitionDelay: '150ms' }}>
                     <div className="why-point-check">
                       <CheckCircleIcon className="check-svg" />
                     </div>
@@ -1018,7 +1072,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="why-point-row">
+                  <div className="why-point-row" data-reveal style={{ transitionDelay: '230ms' }}>
                     <div className="why-point-check">
                       <CheckCircleIcon className="check-svg" />
                     </div>
@@ -1028,7 +1082,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="why-point-row">
+                  <div className="why-point-row" data-reveal style={{ transitionDelay: '310ms' }}>
                     <div className="why-point-check">
                       <CheckCircleIcon className="check-svg" />
                     </div>
@@ -1054,7 +1108,7 @@ export default function App() {
         </section>
 
         {/* ============ FLEET ============ */}
-        <section className="section section-alt" id="fleet">
+        <section className="section section-alt" id="fleet" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>Our Fleet</div>
@@ -1062,60 +1116,55 @@ export default function App() {
               <p>From a quick airport drop to a 12-seater family tour, pick a vehicle that matches your trip.</p>
             </div>
 
-            <div className="grid grid-4" id="fleetGrid">
-              {VEHICLES.map((v) => (
-                <div key={v.id} className="vehicle-card" id={`vehicle-${v.id}`}>
-                  <div className="vehicle-media">
-                    {v.badge && <span className="badge">{v.badge}</span>}
-                    <img
-                      src={v.image}
-                      alt={`${v.name} - TKV Drop Taxi`}
-                      className="vehicle-real-img"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (v.fallbackImage && target.src !== v.fallbackImage) {
-                          target.src = v.fallbackImage;
-                        }
-                      }}
-                    />
+            <div className="fleet-scroll" ref={fleetScrollRef}>
+                {VEHICLES.map((v) => (
+                  <div key={v.id} className="vehicle-card" id={`vehicle-${v.id}`} data-reveal style={{ transitionDelay: '60ms' }}>
+                    <div className="vehicle-media">
+                      {v.badge && <span className="badge">{v.badge}</span>}
+                      <img
+                        src={v.image}
+                        alt={`${v.name} - TKV Drop Taxi`}
+                        className="vehicle-real-img"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div className="vehicle-body">
+                      <h3>{v.name}</h3>
+                      <div className="vehicle-price">
+                        One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', fontWeight: 500 }}>
+                        Local: ₹{v.localPackage?.baseFare} (8h / 100km)
+                      </div>
+                      <div className="vehicle-specs">
+                        <span><UsersIcon className="w-3.5 h-3.5" />{v.seats} Seats</span>
+                        <span><BriefcaseIcon className="w-3.5 h-3.5" />{v.luggage}</span>
+                        <span><SnowIcon className="w-3.5 h-3.5" />{v.ac ? 'AC' : 'Non-AC'}</span>
+                      </div>
+                      <div className="vehicle-features">
+                        {v.features.map((f, i) => (
+                          <span key={i}>{f}</span>
+                        ))}
+                      </div>
+                      <a
+                        href={getVehicleBookingUrl(v.name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary btn-block"
+                      >
+                        <WhatsAppIcon /> Book Now
+                      </a>
+                    </div>
                   </div>
-                  <div className="vehicle-body">
-                    <h3>{v.name}</h3>
-                    <div className="vehicle-price">
-                      One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', fontWeight: 500 }}>
-                      Local: ₹{v.localPackage?.baseFare} (8h / 100km)
-                    </div>
-                    <div className="vehicle-specs">
-                      <span><UsersIcon className="w-3.5 h-3.5" />{v.seats} Seats</span>
-                      <span><BriefcaseIcon className="w-3.5 h-3.5" />{v.luggage}</span>
-                      <span><SnowIcon className="w-3.5 h-3.5" />{v.ac ? 'AC' : 'Non-AC'}</span>
-                    </div>
-                    <div className="vehicle-features">
-                      {v.features.map((f, i) => (
-                        <span key={i}>{f}</span>
-                      ))}
-                    </div>
-                    <a
-                      href={getVehicleBookingUrl(v.name)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-primary btn-block"
-                    >
-                      <WhatsAppIcon /> Book Now
-                    </a>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
+
           </div>
         </section>
 
         {/* ============ POPULAR ROUTES (4 CARDS SINGLE ROW LAYOUT) ============ */}
-        <section className="section popular-routes-section" id="popular-routes">
+        <section className="section popular-routes-section" id="popular-routes" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>POPULAR ROUTES</div>
@@ -1123,56 +1172,59 @@ export default function App() {
               <p>Direct door-to-door drops, 24×7 airport transfers, and long-distance intercity rides at transparent fixed fares.</p>
             </div>
 
-            <div className="popular-routes-grid" id="popularRoutesGrid">
-              {POPULAR_ROUTE_CARDS.map((cat) => (
-                <div key={cat.id} className="popular-route-card" id={`popular-route-${cat.id}`}>
-                  <div className="popular-route-card-header">
-                    <div className="popular-route-title-row">
-                      <div className="popular-route-icon-box">
-                        <PinIcon className="popular-route-loc-icon" />
-                      </div>
-                      <h3 className="popular-route-title">{cat.category}</h3>
-                    </div>
-                    {cat.badge && <span className="popular-route-badge">{cat.badge}</span>}
-                  </div>
-
-                  <div className="popular-route-list">
-                    {cat.routes.map((r, rIdx) => (
-                      <button
-                        key={rIdx}
-                        type="button"
-                        className="popular-route-item"
-                        onClick={() => handleSelectPopularRoute(r.from, r.to)}
-                        title={`Click to set pickup: ${r.from} and drop: ${r.to}`}
-                      >
-                        <div className="popular-route-item-left">
-                          <span className="route-bullet"></span>
-                          <span className="route-label-text">{r.label}</span>
+            <div className="popular-routes-scroll" ref={routesScrollRef}
+                aria-label="Popular route carousel"
+              >
+                {POPULAR_ROUTE_CARDS.map((cat, index) => (
+                  <div key={cat.id} className="popular-route-card" id={`popular-route-${cat.id}`} data-reveal style={{ transitionDelay: `${index * 70}ms` }}>
+                    <div className="popular-route-card-header">
+                      <div className="popular-route-title-row">
+                        <div className="popular-route-icon-box">
+                          <PinIcon className="popular-route-loc-icon" />
                         </div>
-                        <span className="route-select-tag">Book ➔</span>
-                      </button>
-                    ))}
-                  </div>
+                        <h3 className="popular-route-title">{cat.category}</h3>
+                      </div>
+                      {cat.badge && <span className="popular-route-badge">{cat.badge}</span>}
+                    </div>
 
-                  <div className="popular-route-footer">
-                    <a
-                      href={getPopularRouteWhatsAppUrl(cat.category)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="popular-route-view-all"
-                      id={`view-all-${cat.id}`}
-                    >
-                      <span>{cat.actionText}</span>
-                    </a>
+                    <div className="popular-route-list">
+                      {cat.routes.map((r, rIdx) => (
+                        <button
+                          key={rIdx}
+                          type="button"
+                          className="popular-route-item"
+                          onClick={() => handleSelectPopularRoute(r.from, r.to)}
+                          title={`Click to set pickup: ${r.from} and drop: ${r.to}`}
+                        >
+                          <div className="popular-route-item-left">
+                            <span className="route-bullet"></span>
+                            <span className="route-label-text">{r.label}</span>
+                          </div>
+                          <span className="route-select-tag">Book ➔</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="popular-route-footer">
+                      <a
+                        href={getPopularRouteWhatsAppUrl(cat.category)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="popular-route-view-all"
+                        id={`view-all-${cat.id}`}
+                      >
+                        <span>{cat.actionText}</span>
+                      </a>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
+
           </div>
         </section>
 
         {/* ============ SERVICES ============ */}
-        <section className="section" id="services">
+        <section className="section" id="services" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>What We Offer</div>
@@ -1180,8 +1232,8 @@ export default function App() {
               <p>One partner for every kind of journey — business, family, celebration or pilgrimage.</p>
             </div>
             <div className="grid grid-4" id="servicesGrid">
-              {SERVICES.map((s) => (
-                <div key={s.id} className="service-card" id={`service-${s.id}`}>
+              {SERVICES.map((s, index) => (
+                <div key={s.id} className="service-card" id={`service-${s.id}`} data-reveal style={{ transitionDelay: `${index * 70}ms` }}>
                   <div className="service-media">
                     <img
                       src={s.image}
@@ -1189,12 +1241,6 @@ export default function App() {
                       className="service-real-img"
                       loading="lazy"
                       referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (s.fallbackImage && target.src !== s.fallbackImage) {
-                          target.src = s.fallbackImage;
-                        }
-                      }}
                     />
                     <div className="service-media-overlay"></div>
                   </div>
@@ -1209,7 +1255,7 @@ export default function App() {
         </section>
 
         {/* ============ FARE CALCULATOR ============ */}
-        <section className="section section-alt" id="fare-calculator">
+        <section className="section section-alt" id="fare-calculator" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>Fare Calculator</div>
@@ -1450,31 +1496,31 @@ export default function App() {
         </section>
 
         {/* ============ REVIEWS ============ */}
-        <section className="section section-alt" id="reviews">
+        <section className="section section-alt" id="reviews" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>Customer Reviews</div>
               <h2>Trusted by <span className="title-gradient">families &amp; businesses</span></h2>
               <p>Real feedback from travellers across Hosur, Krishnagiri and Bangalore.</p>
             </div>
-            <div className="grid grid-3">
+            <div className="reviews-grid">
               {REVIEWS.map((r, i) => (
-                <div key={i} className="review-card" id={`review-${i}`}>
-                  <div className="review-stars">
-                    {[...Array(r.stars)].map((_, sIdx) => (
-                      <StarIcon key={sIdx} />
-                    ))}
-                  </div>
-                  <p>"{r.quote}"</p>
-                  <div className="review-person">
-                    <div className="review-avatar">{r.avatar}</div>
-                    <div>
-                      <div className="review-name">{r.name}</div>
-                      <div className="review-loc">{r.location}</div>
+                  <div key={i} className="review-card" id={`review-${i}`} data-reveal style={{ transitionDelay: `${i * 90}ms` }}>
+                    <div className="review-stars">
+                      {[...Array(r.stars)].map((_, sIdx) => (
+                        <StarIcon key={sIdx} />
+                      ))}
+                    </div>
+                    <p>"{r.quote}"</p>
+                    <div className="review-person">
+                      <div className="review-avatar">{r.avatar}</div>
+                      <div>
+                        <div className="review-name">{r.name}</div>
+                        <div className="review-loc">{r.location}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </section>
@@ -1504,7 +1550,7 @@ export default function App() {
         </section>
 
         {/* ============ ABOUT ============ */}
-        <section className="section section-alt" id="about">
+        <section className="section section-alt" id="about" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>About Us</div>
@@ -1586,7 +1632,7 @@ export default function App() {
         </section>
 
         {/* ============ CONTACT ============ */}
-        <section className="section" id="contact">
+        <section className="section" id="contact" data-reveal>
           <div className="container">
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>Contact Us</div>
@@ -1790,7 +1836,7 @@ export default function App() {
           </div>
 
           <div className="footer-bottom">
-            <span>© {currentYear}. All rights reserved.</span>
+            <span>© {currentYear} TKV Drop Taxi. All rights reserved.</span>
             <div className="legal-links">
               <a href="#home">Privacy Policy</a>
               <a href="#home">Terms of Service</a>

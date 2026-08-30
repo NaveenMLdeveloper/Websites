@@ -235,96 +235,96 @@ export const SERVICES: ServiceItem[] = [
     id: "airport-pickup",
     name: "Airport Pickup",
     icon: "plane",
-    image: "https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1506015391300-4802dc74de2e?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/airport-pickup.png",
+    fallbackImage: "/images/services/airport-pickup.png",
     desc: "On-time pickups from Bangalore & Chennai airports with flight tracking."
   },
   {
     id: "airport-drop",
     name: "Airport Drop",
     icon: "plane",
-    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1520437358207-323b43b50729?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/airport-drop.png",
+    fallbackImage: "/images/services/airport-drop.png",
     desc: "Relaxed, punctual drop-offs for any domestic or international flight."
   },
   {
     id: "corporate",
     name: "Corporate Travel",
     icon: "briefcase",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/corporate-travel.png",
+    fallbackImage: "/images/services/corporate-travel.png",
     desc: "Reliable rides for business meetings, tech parks & corporate teams."
   },
   {
     id: "wedding",
     name: "Wedding Travel",
     icon: "heart",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/wedding.png",
+    fallbackImage: "/images/services/wedding.png",
     desc: "Decorated, on-time premium cars and guest convoys for your big day."
   },
   {
     id: "outstation",
     name: "Outstation Trips",
     icon: "map-package",
-    image: "https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/outstation.png",
+    fallbackImage: "/images/services/outstation.png",
     desc: "Comfortable long-distance travel across Tamil Nadu, Karnataka & beyond."
   },
   {
     id: "temple",
     name: "Temple Tour",
     icon: "mountain",
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/temple-tour.png",
+    fallbackImage: "/images/services/temple-tour.png",
     desc: "Peaceful pilgrimage trips to Tirupati, Madurai, Rameshwaram & Palani."
   },
   {
     id: "family",
     name: "Family Tour",
     icon: "users",
-    image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/family-tour.png",
+    fallbackImage: "/images/services/family-tour.png",
     desc: "Spacious, safe MPVs and Travellers for memorable family vacations."
   },
   {
     id: "business",
     name: "Business Travel",
     icon: "building",
-    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/business-travel.png",
+    fallbackImage: "/images/services/business-travel.png",
     desc: "Professional chauffeur service for VIP clients and executives."
   },
   {
     id: "school",
     name: "School Trips",
     icon: "school",
-    image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/school-trips.png",
+    fallbackImage: "/images/services/school-trips.png",
     desc: "Safe, verified transport with speed limiters for school outings."
   },
   {
     id: "college",
     name: "College Trips",
     icon: "book",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/college-trips.png",
+    fallbackImage: "/images/services/college-trips.png",
     desc: "Group tempo travellers & buses for college tours and industrial visits."
   },
   {
     id: "packages",
     name: "Tour Packages",
     icon: "mountain",
-    image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/tour-packages.png",
+    fallbackImage: "/images/services/tour-packages.png",
     desc: "Curated hill station & coastal travel packages to Ooty, Kodaikanal & Coorg."
   },
   {
     id: "monthly",
     name: "Monthly Rental",
     icon: "repeat",
-    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800&auto=format&fit=crop",
-    fallbackImage: "https://images.unsplash.com/photo-1563720223185-11003d516935?q=80&w=800&auto=format&fit=crop",
+    image: "/images/services/home-bg.png",
+    fallbackImage: "/images/services/monthly-rental.png",
     desc: "Dedicated vehicle & professional driver contract on a monthly basis."
   }
 ];

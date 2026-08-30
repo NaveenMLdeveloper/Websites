@@ -33,6 +33,47 @@ body {
   overflow-x: hidden;
 }
 
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s var(--ease), transform .6s var(--ease), box-shadow .25s ease;
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-animate-1,
+.hero-animate-2,
+.hero-animate-3,
+.hero-animate-4,
+.hero-animate-5,
+.hero-animate-6 {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: heroReveal .7s var(--ease) forwards;
+}
+
+.hero-animate-1 { animation-delay: .04s; }
+.hero-animate-2 { animation-delay: .12s; }
+.hero-animate-3 { animation-delay: .2s; }
+.hero-animate-4 { animation-delay: .28s; }
+.hero-animate-5 { animation-delay: .36s; }
+.hero-animate-6 { animation-delay: .42s; }
+
+@keyframes heroReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-clean-section::before {
+  transform: translate3d(0, var(--hero-shift, 0px), 0) scale(1.03);
+  transition: transform .3s ease-out;
+}
+
 h1, h2, h3, h4, h5 {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
@@ -68,6 +109,22 @@ h1, h2, h3, h4, h5 {
     animation-iteration-count: 1 !important;
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
+  }
+
+  [data-reveal],
+  .hero-animate-1,
+  .hero-animate-2,
+  .hero-animate-3,
+  .hero-animate-4,
+  .hero-animate-5,
+  .hero-animate-6 {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .hero-clean-section::before {
+    transform: none !important;
   }
 }
 
@@ -468,7 +525,7 @@ h1, h2, h3, h4, h5 {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1920&auto=format&fit=crop');
+  background-image: url('/images/home/home-bg.png');
   background-size: cover;
   background-position: center 38%;
   background-repeat: no-repeat;
@@ -1062,11 +1119,97 @@ h1, h2, h3, h4, h5 {
   border-bottom: 1px solid #E2E8F0;
 }
 
-.popular-routes-grid {
+.fleet-scroll-wrapper,
+.routes-scroll-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reviews-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.fleet-scroll,
+.popular-routes-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 1fr);
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  padding-bottom: 8px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.fleet-scroll {
+  grid-auto-columns: minmax(260px, 340px);
+}
+
+.popular-routes-scroll {
+  grid-auto-columns: minmax(260px, 320px);
+}
+
+.fleet-scroll::-webkit-scrollbar,
+.popular-routes-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(30,64,175,.18);
+  background: rgba(255,255,255,.9);
+  color: var(--primary);
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(15,23,42,.08);
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+  flex-shrink: 0;
+}
+
+.carousel-arrow:hover {
+  transform: translateY(-2px);
+  background: #fff;
+  box-shadow: 0 16px 22px rgba(15,23,42,.12);
+}
+
+.hidden-mobile {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none;
+  }
+
+  .fleet-scroll,
+  .popular-routes-scroll {
+    scroll-snap-type: x mandatory;
+    padding-left: 0;
+    grid-auto-columns: minmax(82%, 1fr);
+  }
+
+  .vehicle-card,
+  .popular-route-card {
+    scroll-snap-align: start;
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .popular-route-card {
@@ -1512,9 +1655,10 @@ h1, h2, h3, h4, h5 {
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   overflow: hidden;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s ease;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .vehicle-card:hover {
@@ -1640,7 +1784,7 @@ h1, h2, h3, h4, h5 {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s ease;
 }
 
 .service-card:hover {
