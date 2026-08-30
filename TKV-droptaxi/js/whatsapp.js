@@ -109,7 +109,7 @@ I would like to enquire about a travel booking estimate generated on your websit
 
 💰 Estimated Fare Breakdown:
 • Base Travel Fare: ₹${baseFare.toLocaleString('en-IN')}
-• Driver Allowance: ₹${driverAllowance.toLocaleString('en-IN')}
+• Driver Bata: Extra
 ${nightStayFee > 0 ? `• Night Stay: ₹${nightStayFee.toLocaleString('en-IN')}\n` : ""}• Estimated Total: ₹${estimatedTotal.toLocaleString('en-IN')}
 
 Please confirm vehicle availability and the final confirmed fare.
