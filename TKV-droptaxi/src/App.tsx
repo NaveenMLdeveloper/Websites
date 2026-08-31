@@ -240,6 +240,7 @@ export default function App() {
     }
 
     message += `• *Toll & Parking:* Extra\n` +
+      `• *Driver Bata:* ₹400\n` +
       (heroName ? `• *Passenger Name:* ${heroName}\n` : '') +
       (heroPhone ? `• *WhatsApp / Phone:* ${heroPhone}\n` : '') +
       `----------------------------------------\n` +
@@ -549,6 +550,7 @@ export default function App() {
 
     message += `• *Estimated Fare:* ${formatINR(calculation.total)}\n` +
       `• *Toll & Parking:* Extra\n` +
+      `• *Driver Bata:* 400\n` +
       `----------------------------------------\n` +
       `Please confirm vehicle availability and booking.`;
 
@@ -1132,7 +1134,7 @@ export default function App() {
                     <div className="vehicle-body">
                       <h3>{v.name}</h3>
                       <div className="vehicle-price">
-                        One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km
+                        One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km · Driver Bata:₹400
                       </div>
                       <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', fontWeight: 500 }}>
                         Local: ₹{v.localPackage?.baseFare} (8h / 100km)
@@ -1429,7 +1431,7 @@ export default function App() {
                       ) : null}
                       <div className="result-row">
                         <span>Driver Bata</span>
-                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>Extra</span>
+                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>₹400</span>
                       </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>
@@ -1460,7 +1462,7 @@ export default function App() {
                       </div>
                       <div className="result-row">
                         <span>Driver Bata</span>
-                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>Extra</span>
+                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>₹400</span>
                       </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>
@@ -1555,7 +1557,7 @@ export default function App() {
             <div className="section-head">
               <div className="eyebrow"><span className="dot"></span>About Us</div>
               <h2>A decade on <span className="title-gradient">South India's highways</span></h2>
-              <p>TKV Drop Taxi started as a two-car outfit in Hosur — today we're a trusted name across Krishnagiri, Bangalore, Chennai and Tamil Nadu.</p>
+              <p>TKV Drop Taxi provides reliable one-way drop taxi and outstation cab services from Hosur to Bangalore, Chennai, Krishnagiri and other destinations across Tamil Nadu.</p>
             </div>
 
             <div className="about-grid">
