@@ -112,9 +112,9 @@ export default function App() {
   // Fare calculator state
   const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'local'>('oneway');
   const [selectedVehicleIndex, setSelectedVehicleIndex] = useState(0);
-  const [distanceKm, setDistanceKm] = useState<number>(120);
-  const [extraKm, setExtraKm] = useState<number>(0);
-  const [extraHours, setExtraHours] = useState<number>(0);
+  const [distanceKm, setDistanceKm] = useState<string>('120');
+  const [extraKm, setExtraKm] = useState<string>('0');
+  const [extraHours, setExtraHours] = useState<string>('0');
 
   // Contact form state
   const [contactName, setContactName] = useState('');
@@ -174,6 +174,8 @@ export default function App() {
 
   // Estimation for hero form
   const heroEstimate = useMemo(() => {
+    const driverBata = 400;
+
     if (heroTripType === 'local') {
       const pkg = heroSelectedVehicle.localPackage || {
         baseFare: 2000,
@@ -186,7 +188,7 @@ export default function App() {
         distance: pkg.baseKm,
         billedKm: pkg.baseKm,
         rate: pkg.extraKmRate,
-        total: pkg.baseFare,
+        total: pkg.baseFare + driverBata,
         zeroReturn: false,
         isLocal: true,
         pkg
@@ -194,9 +196,9 @@ export default function App() {
     }
 
     const effectiveDistance = heroTripType === 'roundtrip' ? heroDistance * 2 : heroDistance;
-    const billedKm = Math.max(effectiveDistance, heroSelectedVehicle.minKm);
+    const billedKm = effectiveDistance;
     const applicableRate = heroTripType === 'roundtrip' ? heroSelectedVehicle.roundRate : heroSelectedVehicle.onewayRate;
-    const fare = billedKm * applicableRate;
+    const fare = billedKm * applicableRate + driverBata;
 
     return {
       distance: effectiveDistance,
@@ -478,8 +480,15 @@ export default function App() {
   // Selected vehicle object
   const currentVehicle: Vehicle = VEHICLES[selectedVehicleIndex] || VEHICLES[0];
 
+  const toNumber = (value: string | number | undefined, fallback = 0) => {
+    const parsed = Number.parseFloat(String(value ?? '').replace(/,/g, ''));
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+
   // Fare calculations
   const calculation = useMemo(() => {
+    const driverBata = 400;
+
     if (tripType === 'local') {
       const pkg = currentVehicle.localPackage || {
         baseFare: 2000,
@@ -488,11 +497,11 @@ export default function App() {
         extraKmRate: 14,
         waitingPerHour: 150
       };
-      const validExtraKm = Math.max(Number(extraKm) || 0, 0);
-      const validExtraHours = Math.max(Number(extraHours) || 0, 0);
+      const validExtraKm = Math.max(toNumber(extraKm, 0), 0);
+      const validExtraHours = Math.max(toNumber(extraHours, 0), 0);
       const extraKmCost = validExtraKm * pkg.extraKmRate;
       const extraWaitingCost = validExtraHours * pkg.waitingPerHour;
-      const total = pkg.baseFare + extraKmCost + extraWaitingCost;
+      const total = pkg.baseFare + extraKmCost + extraWaitingCost + driverBata;
 
       return {
         tripType: 'local',
@@ -505,16 +514,17 @@ export default function App() {
         ratePerKm: pkg.extraKmRate,
         billedKm: pkg.baseKm + validExtraKm,
         total,
-        dist: pkg.baseKm + validExtraKm
+        dist: pkg.baseKm + validExtraKm,
+        driverBata
       };
     }
 
-    const dist = Math.max(Number(distanceKm) || 1, 1);
+    const dist = Math.max(toNumber(distanceKm, 1), 1);
     const applicableRate = tripType === 'roundtrip' ? currentVehicle.roundRate : currentVehicle.onewayRate;
     const effectiveKm = tripType === 'roundtrip' ? dist * 2 : dist;
-    const billedKm = Math.max(effectiveKm, currentVehicle.minKm);
+    const billedKm = effectiveKm;
     const baseFare = billedKm * applicableRate;
-    const total = baseFare;
+    const total = baseFare + driverBata;
 
     return {
       tripType,
@@ -522,7 +532,8 @@ export default function App() {
       billedKm,
       baseFare,
       total,
-      dist
+      dist,
+      driverBata
     };
   }, [tripType, currentVehicle, distanceKm, extraKm, extraHours]);
 
@@ -533,6 +544,7 @@ export default function App() {
       : tripType === 'roundtrip' 
         ? 'Round Trip Taxi' 
         : 'Local Trip (8 Hours / 100 KM)';
+    const enteredDistance = toNumber(distanceKm, 0);
     
     let message = `🚖 *TKV DROP TAXI - INSTANT TRIP ESTIMATE*\n` +
       `----------------------------------------\n` +
@@ -544,13 +556,13 @@ export default function App() {
         (calculation.extraKm ? `• *Extra KM:* ${calculation.extraKm} km (+₹${calculation.extraKmCost})\n` : '') +
         (calculation.extraHours ? `• *Extra Waiting:* ${calculation.extraHours} hrs (+₹${calculation.extraWaitingCost})\n` : '');
     } else {
-      message += `• *Distance:* ${distanceKm} km ${tripType === 'roundtrip' ? `(Round Trip Billed: ${calculation.billedKm} km)` : ''}\n` +
+      message += `• *Distance:* ${enteredDistance || 0} km ${tripType === 'roundtrip' ? `(Round Trip Billed: ${calculation.billedKm} km)` : ''}\n` +
         `• *Rate:* ₹${calculation.ratePerKm}/km\n`;
     }
 
     message += `• *Estimated Fare:* ${formatINR(calculation.total)}\n` +
       `• *Toll & Parking:* Extra\n` +
-      `• *Driver Bata:* 400\n` +
+      `• *Driver Bata:* ${formatINR(calculation.driverBata || 400)}\n` +
       `----------------------------------------\n` +
       `Please confirm vehicle availability and booking.`;
 
@@ -1327,7 +1339,7 @@ export default function App() {
                       type="number"
                       min={1}
                       value={distanceKm}
-                      onChange={(e) => setDistanceKm(Number(e.target.value))}
+                      onChange={(e) => setDistanceKm(e.target.value)}
                       className="input"
                       id="distanceInput"
                       placeholder="e.g. 120"
@@ -1363,7 +1375,7 @@ export default function App() {
                           type="number"
                           min={0}
                           value={extraKm}
-                          onChange={(e) => setExtraKm(Number(e.target.value))}
+                          onChange={(e) => setExtraKm(e.target.value)}
                           className="input"
                           id="extraKmInput"
                           placeholder="0"
@@ -1378,7 +1390,7 @@ export default function App() {
                           type="number"
                           min={0}
                           value={extraHours}
-                          onChange={(e) => setExtraHours(Number(e.target.value))}
+                          onChange={(e) => setExtraHours(e.target.value)}
                           className="input"
                           id="extraHoursInput"
                           placeholder="0"
@@ -1431,7 +1443,7 @@ export default function App() {
                       ) : null}
                       <div className="result-row">
                         <span>Driver Bata</span>
-                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>₹400</span>
+                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>{formatINR(calculation.driverBata || 400)}</span>
                       </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>
@@ -1462,7 +1474,7 @@ export default function App() {
                       </div>
                       <div className="result-row">
                         <span>Driver Bata</span>
-                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>₹400</span>
+                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>{formatINR(calculation.driverBata || 400)}</span>
                       </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>
