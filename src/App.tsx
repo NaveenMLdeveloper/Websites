@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, FormEvent } from 'react';
+import { PlacesAutocompleteInput } from './components/PlacesAutocompleteInput';
+import { calculateDrivingDistance, formatDuration, SelectedPlace } from './services/googleMaps';
 import {
   CONFIG,
   VEHICLES,
@@ -28,6 +30,8 @@ import {
   HeartIcon,
   MountainIcon,
   BriefcaseIcon,
+  HeartPulseIcon,
+  CompassIcon,
   SchoolIcon,
   BookIcon,
   MapPackageIcon,
@@ -100,6 +104,12 @@ export default function App() {
   const [heroTripType, setHeroTripType] = useState<'oneway' | 'roundtrip' | 'local'>('oneway');
   const [heroPickup, setHeroPickup] = useState('Hosur');
   const [heroDrop, setHeroDrop] = useState('Chennai');
+  const [pickupPlace, setPickupPlace] = useState<SelectedPlace | null>({ name: 'Hosur' });
+  const [dropPlace, setDropPlace] = useState<SelectedPlace | null>({ name: 'Chennai' });
+  const [routeDistance, setRouteDistance] = useState<number | null>(null);
+  const [routeDuration, setRouteDuration] = useState<string | null>(null);
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState<boolean>(false);
+  const [routeError, setRouteError] = useState<string | null>(null);
   const [heroDate, setHeroDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -112,7 +122,14 @@ export default function App() {
   // Fare calculator state
   const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'local'>('oneway');
   const [selectedVehicleIndex, setSelectedVehicleIndex] = useState(0);
-  const [distanceKm, setDistanceKm] = useState<string>('120');
+  const [calcPickup, setCalcPickup] = useState('Hosur');
+  const [calcDrop, setCalcDrop] = useState('Chennai');
+  const [calcPickupPlace, setCalcPickupPlace] = useState<SelectedPlace | null>({ name: 'Hosur' });
+  const [calcDropPlace, setCalcDropPlace] = useState<SelectedPlace | null>({ name: 'Chennai' });
+  const [isCalcRouting, setIsCalcRouting] = useState<boolean>(false);
+  const [calcRouteError, setCalcRouteError] = useState<string | null>(null);
+  const [calcRouteDuration, setCalcRouteDuration] = useState<string | null>(null);
+  const [distanceKm, setDistanceKm] = useState<string>('330');
   const [extraKm, setExtraKm] = useState<string>('0');
   const [extraHours, setExtraHours] = useState<string>('0');
 
@@ -163,14 +180,114 @@ export default function App() {
     return { ...defaultV, rate: activeRate };
   }, [heroVehicleId, heroTripType]);
 
-  // Distance calculation for hero
-  const heroDistance = useMemo(() => {
-    const p = heroPickup.trim().toLowerCase();
-    const d = heroDrop.trim().toLowerCase();
-    const key = `${p}-${d}`;
-    if (POPULAR_DISTANCES[key]) return POPULAR_DISTANCES[key];
-    return 120;
-  }, [heroPickup, heroDrop]);
+  // Helper to format vehicle name without duplicating type (e.g. Maruti Ertiga (SUV) without extra (SUV))
+  const formatVehicleNameForWa = (name: string, type: string) => {
+    const typeUpper = (type || '').toUpperCase();
+    const trimmed = (name || '').trim();
+    if (typeUpper && trimmed.toUpperCase().includes(`(${typeUpper})`)) {
+      return trimmed;
+    }
+    return typeUpper ? `${trimmed} (${typeUpper})` : trimmed;
+  };
+
+  // Google Routes API driving road distance calculation effect
+  useEffect(() => {
+    if (heroTripType === 'local') {
+      setRouteError(null);
+      setIsCalculatingRoute(false);
+      return;
+    }
+
+    const p = (heroPickup || '').trim();
+    const d = (heroDrop || '').trim();
+    if (!p || !d) {
+      setRouteDistance(null);
+      setRouteError('Please enter both FROM and TO locations.');
+      setIsCalculatingRoute(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsCalculatingRoute(true);
+    setRouteError(null);
+
+    const timer = setTimeout(async () => {
+      const origin = pickupPlace && pickupPlace.name === p ? pickupPlace : p;
+      const destination = dropPlace && dropPlace.name === d ? dropPlace : d;
+
+      const { result, error } = await calculateDrivingDistance(origin, destination);
+      if (!isMounted) return;
+
+      setIsCalculatingRoute(false);
+      if (error || !result) {
+        setRouteDistance(null);
+        setRouteError(error || 'Could not calculate road distance between locations.');
+      } else {
+        setRouteDistance(result.distanceKm);
+        setRouteDuration(formatDuration(result.duration));
+        setRouteError(null);
+      }
+    }, 280);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [heroPickup, heroDrop, pickupPlace, dropPlace, heroTripType]);
+
+  // Swap locations for fare calculator
+  const handleSwapCalcCities = () => {
+    const tempText = calcPickup;
+    setCalcPickup(calcDrop);
+    setCalcDrop(tempText);
+
+    const tempPlace = calcPickupPlace;
+    setCalcPickupPlace(calcDropPlace);
+    setCalcDropPlace(tempPlace);
+  };
+
+  // Google Routes API driving distance calculation for Fare Calculator
+  useEffect(() => {
+    if (tripType === 'local') {
+      setCalcRouteError(null);
+      setIsCalcRouting(false);
+      return;
+    }
+
+    const p = (calcPickup || '').trim();
+    const d = (calcDrop || '').trim();
+    if (!p || !d) {
+      setCalcRouteError('Please enter both FROM and TO locations.');
+      setIsCalcRouting(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsCalcRouting(true);
+    setCalcRouteError(null);
+
+    const timer = setTimeout(async () => {
+      const origin = calcPickupPlace && calcPickupPlace.name === p ? calcPickupPlace : p;
+      const destination = calcDropPlace && calcDropPlace.name === d ? calcDropPlace : d;
+
+      const { result, error } = await calculateDrivingDistance(origin, destination);
+      if (!isMounted) return;
+
+      setIsCalcRouting(false);
+      if (error || !result) {
+        setCalcRouteError(error || 'Could not calculate road distance between locations.');
+      } else {
+        setDistanceKm(String(result.distanceKm));
+        setCalcRouteDuration(formatDuration(result.duration));
+        setCalcRouteError(null);
+      }
+    }, 280);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [calcPickup, calcDrop, calcPickupPlace, calcDropPlace, tripType]);
 
   // Estimation for hero form
   const heroEstimate = useMemo(() => {
@@ -188,15 +305,22 @@ export default function App() {
         distance: pkg.baseKm,
         billedKm: pkg.baseKm,
         rate: pkg.extraKmRate,
-        total: pkg.baseFare + driverBata,
+        total: pkg.baseFare,
         zeroReturn: false,
         isLocal: true,
         pkg
       };
     }
 
-    const effectiveDistance = heroTripType === 'roundtrip' ? heroDistance * 2 : heroDistance;
-    const billedKm = effectiveDistance;
+    // Google Routes API driving distance
+    // Do not use straight-line, hardcoded or fake distances.
+    // If routing fails, do not generate a fake fare; show an error instead.
+    if (routeDistance == null || routeError) {
+      return null;
+    }
+
+    const effectiveDistance = heroTripType === 'roundtrip' ? routeDistance * 2 : routeDistance;
+    const billedKm = Math.max(effectiveDistance, 130);
     const applicableRate = heroTripType === 'roundtrip' ? heroSelectedVehicle.roundRate : heroSelectedVehicle.onewayRate;
     const fare = billedKm * applicableRate + driverBata;
 
@@ -208,7 +332,7 @@ export default function App() {
       zeroReturn: heroTripType === 'oneway',
       isLocal: false
     };
-  }, [heroDistance, heroSelectedVehicle, heroTripType]);
+  }, [routeDistance, routeError, heroSelectedVehicle, heroTripType]);
 
   // Format currency in Indian Rupees format (e.g. ₹1,400)
   const formatINR = (val: number) => {
@@ -229,21 +353,28 @@ export default function App() {
       `• *From:* ${heroPickup || 'Hosur'}\n` +
       `• *To:* ${heroDrop || 'Chennai'}\n` +
       `• *Date & Time:* ${heroDate || 'Today'} at ${heroTime || 'Now'}\n` +
-      `• *Vehicle:* ${heroSelectedVehicle.name} (${heroSelectedVehicle.type.toUpperCase()})\n`;
+      `• *Vehicle:* ${formatVehicleNameForWa(heroSelectedVehicle.name, heroSelectedVehicle.type)}\n`;
 
     if (heroTripType === 'local') {
       message += `• *Local Package:* 8 Hours / 100 KM\n` +
-        `• *Estimated Base Fare:* ${formatINR(heroEstimate.total)}\n` +
+        `• *Estimated Base Fare:* ${formatINR(heroEstimate ? heroEstimate.total : (heroSelectedVehicle.localPackage?.baseFare || 2000))}\n` +
         `• *Extra Rate:* ₹${heroSelectedVehicle.localPackage?.extraKmRate || 14}/km | ₹${heroSelectedVehicle.localPackage?.waitingPerHour || 150}/hr waiting\n`;
     } else {
-      message += `• *Approx Distance:* ${heroEstimate.distance} km ${heroTripType === 'roundtrip' ? '(Round Trip)' : ''}\n` +
-        `• *Base Rate:* ₹${heroEstimate.rate}/km\n` +
-        `• *Estimated Total:* ${formatINR(heroEstimate.total)} ${heroEstimate.zeroReturn ? '(Zero Return Charges!)' : ''}\n`;
+      const dist = heroEstimate ? heroEstimate.distance : (routeDistance || 0);
+      message += `• *Approx Distance:* ${dist} km ${heroTripType === 'roundtrip' ? '(Round Trip)' : ''}\n` +
+        `• *Base Rate:* ₹${heroEstimate?.rate ?? (heroTripType === 'roundtrip' ? heroSelectedVehicle.roundRate : heroSelectedVehicle.onewayRate)}/km\n` +
+        `• *Estimated Total:* ${heroEstimate ? formatINR(heroEstimate.total) : 'Pending Route Verification'} ${heroEstimate?.zeroReturn ? '(Zero Return Charges!)' : ''}\n`;
     }
 
-    message += `• *Toll & Parking:* Extra\n` +
-      `• *Driver Bata:* ₹400\n` +
-      (heroName ? `• *Passenger Name:* ${heroName}\n` : '') +
+    message += `• *Toll & Parking:* Extra\n`;
+
+    // Local trip (8 Hours / 100 KM) does NOT charge Driver Bata.
+    // Keep Driver Bata for One Way and Round Trip.
+    if (heroTripType !== 'local') {
+      message += `• *Driver Bata:* ₹400\n`;
+    }
+
+    message += (heroName ? `• *Passenger Name:* ${heroName}\n` : '') +
       (heroPhone ? `• *WhatsApp / Phone:* ${heroPhone}\n` : '') +
       `----------------------------------------\n` +
       `Please confirm availability and dispatch details.`;
@@ -253,9 +384,13 @@ export default function App() {
 
   // Swap pickup & drop
   const handleSwapCities = () => {
-    const temp = heroPickup;
+    const tempText = heroPickup;
     setHeroPickup(heroDrop);
-    setHeroDrop(temp);
+    setHeroDrop(tempText);
+
+    const tempPlace = pickupPlace;
+    setPickupPlace(dropPlace);
+    setDropPlace(tempPlace);
   };
 
   // Scroll listener for sticky navbar & active section highlighting
@@ -414,7 +549,7 @@ export default function App() {
       }
     ];
 
-    let scriptTag = document.getElementById('tkw-seo-schema');
+    let scriptTag = document.getElementById('tkw-seo-schema') as HTMLScriptElement | null;
     if (!scriptTag) {
       scriptTag = document.createElement('script');
       scriptTag.id = 'tkw-seo-schema';
@@ -487,7 +622,7 @@ export default function App() {
 
   // Fare calculations
   const calculation = useMemo(() => {
-    const driverBata = 400;
+    const driverBata = tripType === 'local' ? 0 : 400;
 
     if (tripType === 'local') {
       const pkg = currentVehicle.localPackage || {
@@ -501,7 +636,7 @@ export default function App() {
       const validExtraHours = Math.max(toNumber(extraHours, 0), 0);
       const extraKmCost = validExtraKm * pkg.extraKmRate;
       const extraWaitingCost = validExtraHours * pkg.waitingPerHour;
-      const total = pkg.baseFare + extraKmCost + extraWaitingCost + driverBata;
+      const total = pkg.baseFare + extraKmCost + extraWaitingCost;
 
       return {
         tripType: 'local',
@@ -515,7 +650,7 @@ export default function App() {
         billedKm: pkg.baseKm + validExtraKm,
         total,
         dist: pkg.baseKm + validExtraKm,
-        driverBata
+        driverBata: 0
       };
     }
 
@@ -548,8 +683,10 @@ export default function App() {
     
     let message = `🚖 *TKV DROP TAXI - INSTANT TRIP ESTIMATE*\n` +
       `----------------------------------------\n` +
-      `• *Vehicle:* ${currentVehicle.name}\n` +
-      `• *Trip Type:* ${tripLabel}\n`;
+      `• *Vehicle:* ${formatVehicleNameForWa(currentVehicle.name, currentVehicle.type)}\n` +
+      `• *Trip Type:* ${tripLabel}\n` +
+      `• *From:* ${calcPickup || 'Hosur'}\n` +
+      (tripType !== 'local' ? `• *To:* ${calcDrop || 'Chennai'}\n` : '');
 
     if (tripType === 'local') {
       message += `• *Local Package:* 8 Hours / 100 KM (₹${calculation.baseFare})\n` +
@@ -561,9 +698,13 @@ export default function App() {
     }
 
     message += `• *Estimated Fare:* ${formatINR(calculation.total)}\n` +
-      `• *Toll & Parking:* Extra\n` +
-      `• *Driver Bata:* ${formatINR(calculation.driverBata || 400)}\n` +
-      `----------------------------------------\n` +
+      `• *Toll & Parking:* Extra\n`;
+
+    if (tripType !== 'local') {
+      message += `• *Driver Bata:* ${formatINR(calculation.driverBata || 400)}\n`;
+    }
+
+    message += `----------------------------------------\n` +
       `Please confirm vehicle availability and booking.`;
 
     return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(message)}`;
@@ -608,6 +749,10 @@ export default function App() {
         return <UsersIcon className="w-5 h-5" />;
       case 'building':
         return <BuildingIcon className="w-5 h-5" />;
+      case 'heart-pulse':
+        return <HeartPulseIcon className="w-5 h-5" />;
+      case 'compass':
+        return <CompassIcon className="w-5 h-5" />;
       case 'school':
         return <SchoolIcon className="w-5 h-5" />;
       case 'book':
@@ -900,6 +1045,7 @@ export default function App() {
                     </div>
 
                     {/* Row 2: From & To in the Same Row */}
+                    {/* Row 2: From & To in the Same Row with Google Places Autocomplete */}
                     <div className="clean-fields-row">
                       <div className="clean-field-group">
                         <div className="flex items-center justify-between">
@@ -913,32 +1059,40 @@ export default function App() {
                             ⇄ Swap
                           </button>
                         </div>
-                        <div className="clean-input-wrap">
-                          <span className="clean-input-dot dot-green"></span>
-                          <input
-                            type="text"
-                            id="heroPickupInput"
-                            value={heroPickup}
-                            onChange={(e) => setHeroPickup(e.target.value)}
-                            placeholder="Pickup City/Loc"
-                            className="clean-input clean-input-with-dot"
-                          />
-                        </div>
+                        <PlacesAutocompleteInput
+                          id="heroPickupInput"
+                          value={heroPickup}
+                          onChange={(val) => {
+                            setHeroPickup(val);
+                            if (pickupPlace && pickupPlace.name !== val) {
+                              setPickupPlace({ name: val });
+                            }
+                          }}
+                          onSelectPlace={(place) => {
+                            setPickupPlace(place);
+                          }}
+                          placeholder="Pickup City/Loc"
+                          dotColor="green"
+                        />
                       </div>
 
                       <div className="clean-field-group">
                         <label htmlFor="heroDropInput" className="clean-field-caps-label">TO</label>
-                        <div className="clean-input-wrap">
-                          <span className="clean-input-dot dot-red"></span>
-                          <input
-                            type="text"
-                            id="heroDropInput"
-                            value={heroDrop}
-                            onChange={(e) => setHeroDrop(e.target.value)}
-                            placeholder="Drop City/Loc"
-                            className="clean-input clean-input-with-dot"
-                          />
-                        </div>
+                        <PlacesAutocompleteInput
+                          id="heroDropInput"
+                          value={heroDrop}
+                          onChange={(val) => {
+                            setHeroDrop(val);
+                            if (dropPlace && dropPlace.name !== val) {
+                              setDropPlace({ name: val });
+                            }
+                          }}
+                          onSelectPlace={(place) => {
+                            setDropPlace(place);
+                          }}
+                          placeholder="Drop City/Loc"
+                          dotColor="red"
+                        />
                       </div>
                     </div>
 
@@ -1016,12 +1170,65 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* Real-time Driving Route Distance from Google Routes API */}
+                  {heroTripType !== 'local' && (
+                    <div className="mb-2">
+                      {isCalculatingRoute ? (
+                        <div className="clean-route-status clean-route-loading">
+                          <svg className="animate-spin h-3.5 w-3.5 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>Calculating road distance via Google Routes API...</span>
+                        </div>
+                      ) : routeError ? (
+                        <div className="clean-route-status clean-route-error">
+                          <span className="shrink-0 font-bold">⚠️</span>
+                          <div className="text-[11px] leading-tight">
+                            <span className="font-semibold">Routing Error: </span>
+                            <span>{routeError}</span>
+                          </div>
+                        </div>
+                      ) : heroEstimate ? (
+                        <div className="clean-route-status clean-route-success">
+                          <div className="flex items-center justify-between w-full text-xs">
+                            <span className="text-slate-600">
+                              Approx Distance:{' '}
+                              <strong className="text-slate-900 font-bold">
+                                {heroEstimate.distance} km
+                                {heroTripType === 'roundtrip' ? ' (Round Trip)' : ''}
+                              </strong>
+                              {routeDuration ? ` (~${routeDuration})` : ''}
+                            </span>
+                            <span className="text-slate-600">
+                              Est. Fare:{' '}
+                              <strong className="text-blue-700 font-bold text-sm">
+                                {formatINR(heroEstimate.total)}
+                              </strong>
+                            </span>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+
                   {/* Primary Action Button: GET ESTIMATION */}
                   <a
-                    href={getHeroWhatsAppUrl()}
+                    href={heroTripType !== 'local' && (!heroEstimate || isCalculatingRoute) ? '#' : getHeroWhatsAppUrl()}
+                    onClick={(e) => {
+                      if (heroTripType !== 'local') {
+                        if (isCalculatingRoute) {
+                          e.preventDefault();
+                          alert('Please wait a moment while we calculate the exact driving distance via Google Routes API.');
+                        } else if (!heroEstimate || routeError) {
+                          e.preventDefault();
+                          alert(`Routing error: ${routeError || 'Unable to calculate driving route'}. Please ensure valid locations are chosen.`);
+                        }
+                      }
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="clean-get-estimation-btn"
+                    className={`clean-get-estimation-btn ${heroTripType !== 'local' && (!heroEstimate || isCalculatingRoute) ? 'opacity-80' : ''}`}
                     id="heroGetEstimationBtn"
                   >
                     <span>GET ESTIMATION</span>
@@ -1309,7 +1516,81 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="form-group">
+                {/* FROM and TO Locations with Places Autocomplete */}
+                {tripType !== 'local' ? (
+                  <div className="form-row" style={{ position: 'relative', zIndex: 20 }}>
+                    <div className="form-group" style={{ position: 'relative', marginBottom: '16px' }}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label htmlFor="calcPickupInput" className="font-semibold text-slate-700 text-xs tracking-wider">
+                          FROM (PICKUP)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleSwapCalcCities}
+                          className="text-[11px] font-semibold text-[#0F3D91] hover:text-[#0A2358] transition-colors"
+                          title="Swap Pickup & Drop locations"
+                        >
+                          ⇄ Swap
+                        </button>
+                      </div>
+                      <PlacesAutocompleteInput
+                        id="calcPickupInput"
+                        value={calcPickup}
+                        onChange={(val) => {
+                          setCalcPickup(val);
+                          if (calcPickupPlace && calcPickupPlace.name !== val) {
+                            setCalcPickupPlace({ name: val });
+                          }
+                        }}
+                        onSelectPlace={(place) => setCalcPickupPlace(place)}
+                        placeholder="Pickup city or area"
+                        dotColor="green"
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ position: 'relative', marginBottom: '16px' }}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label htmlFor="calcDropInput" className="font-semibold text-slate-700 text-xs tracking-wider">
+                          TO (DROP)
+                        </label>
+                      </div>
+                      <PlacesAutocompleteInput
+                        id="calcDropInput"
+                        value={calcDrop}
+                        onChange={(val) => {
+                          setCalcDrop(val);
+                          if (calcDropPlace && calcDropPlace.name !== val) {
+                            setCalcDropPlace({ name: val });
+                          }
+                        }}
+                        onSelectPlace={(place) => setCalcDropPlace(place)}
+                        placeholder="Drop city or area"
+                        dotColor="red"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="form-group" style={{ position: 'relative', zIndex: 20, marginBottom: '16px' }}>
+                    <label htmlFor="calcPickupInput" className="font-semibold text-slate-700 text-xs tracking-wider">
+                      PICKUP LOCALITY / CITY (8 Hours / 100 KM Coverage)
+                    </label>
+                    <PlacesAutocompleteInput
+                      id="calcPickupInput"
+                      value={calcPickup}
+                      onChange={(val) => {
+                        setCalcPickup(val);
+                        if (calcPickupPlace && calcPickupPlace.name !== val) {
+                          setCalcPickupPlace({ name: val });
+                        }
+                      }}
+                      onSelectPlace={(place) => setCalcPickupPlace(place)}
+                      placeholder="e.g. Hosur, Electronic City, Bangalore"
+                      dotColor="green"
+                    />
+                  </div>
+                )}
+
+                <div className="form-group" style={{ position: 'relative', zIndex: 10 }}>
                   <label htmlFor="vehicleSelect">Select Vehicle</label>
                   <select
                     className="select"
@@ -1333,8 +1614,17 @@ export default function App() {
                 </div>
 
                 {tripType !== 'local' ? (
-                  <div className="form-group">
-                    <label htmlFor="distanceInput">Distance (KM)</label>
+                  <div className="form-group" style={{ position: 'relative', zIndex: 5 }}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label htmlFor="distanceInput" style={{ marginBottom: 0 }}>Distance (KM)</label>
+                      {isCalcRouting ? (
+                        <span className="text-[11px] text-[#0F3D91] font-medium animate-pulse">Calculating road route...</span>
+                      ) : calcRouteDuration ? (
+                        <span className="text-[11px] text-emerald-700 font-medium bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          Approx: {formatDuration(calcRouteDuration)} drive
+                        </span>
+                      ) : null}
+                    </div>
                     <input
                       type="number"
                       min={1}
@@ -1344,6 +1634,11 @@ export default function App() {
                       id="distanceInput"
                       placeholder="e.g. 120"
                     />
+                    {calcRouteError && (
+                      <div className="text-[11.5px] text-red-600 mt-1 font-medium">
+                        {calcRouteError}
+                      </div>
+                    )}
                     <div style={{ fontSize: '12.5px', color: '#64748B', marginTop: '6px', lineHeight: 1.4 }}>
                       {tripType === 'oneway' ? (
                         <span>Rate: <strong>₹{currentVehicle.onewayRate}/km</strong> (Sedan ₹15 · SUV ₹20 · Innova/Crysta ₹21)</span>
@@ -1366,6 +1661,7 @@ export default function App() {
                     }}>
                       <div style={{ fontWeight: 700, marginBottom: '2px' }}>✓ Included in Base Package: 8 Hours &amp; 100 KM</div>
                       <div>Base Fare: <strong>₹{currentVehicle.localPackage?.baseFare || 2000}</strong> (Sedan ₹2,000 · SUV ₹2,800 · Innova ₹3,500)</div>
+                      <div className="text-xs text-emerald-800 font-semibold mt-1">✓ No Driver Bata for Local Trips (Driver Bata: ₹0)</div>
                     </div>
 
                     <div className="form-row">
@@ -1422,6 +1718,10 @@ export default function App() {
                         <span id="rTripType">Local Package (8h / 100km)</span>
                       </div>
                       <div className="result-row">
+                        <span>Pickup Location</span>
+                        <span id="rFromLoc">{calcPickup || 'Hosur'}</span>
+                      </div>
+                      <div className="result-row">
                         <span>Selected Vehicle</span>
                         <span id="rVehicle">{currentVehicle.name}</span>
                       </div>
@@ -1443,7 +1743,7 @@ export default function App() {
                       ) : null}
                       <div className="result-row">
                         <span>Driver Bata</span>
-                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>{formatINR(calculation.driverBata || 400)}</span>
+                        <span id="rDriverBeta" style={{ color: '#34D399', fontWeight: 600 }}>₹0 (No Bata for Local)</span>
                       </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>
@@ -1455,6 +1755,14 @@ export default function App() {
                       <div className="result-row">
                         <span>Trip Type</span>
                         <span id="rTripType">{tripType === 'oneway' ? 'One Way Drop' : 'Round Trip'}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Pickup (From)</span>
+                        <span id="rFromLoc">{calcPickup || 'Hosur'}</span>
+                      </div>
+                      <div className="result-row">
+                        <span>Drop (To)</span>
+                        <span id="rToLoc">{calcDrop || 'Chennai'}</span>
                       </div>
                       <div className="result-row">
                         <span>Selected Vehicle</span>

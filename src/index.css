@@ -781,7 +781,7 @@ h1, h2, h3, h4, h5 {
   max-width: 440px;
   margin-left: auto;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
@@ -801,6 +801,8 @@ h1, h2, h3, h4, h5 {
   background: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%);
   padding: 14px 18px 12px;
   text-align: center;
+  border-top-left-radius: 19px;
+  border-top-right-radius: 19px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
@@ -1017,6 +1019,37 @@ h1, h2, h3, h4, h5 {
 
 .cab-select-card.selected .cab-card-name {
   color: #0066CC;
+}
+
+/* ============ ROUTE STATUS & DISTANCE PREVIEW ============ */
+.clean-route-status {
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 2px;
+  box-sizing: border-box;
+}
+
+.clean-route-loading {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+}
+
+.clean-route-error {
+  background: #FEF2F2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+}
+
+.clean-route-success {
+  background: #F0FDF4;
+  color: #166534;
+  border: 1px solid #BBF7D0;
 }
 
 /* ============ GET ESTIMATION BUTTON ============ */
@@ -1850,7 +1883,7 @@ h1, h2, h3, h4, h5 {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 28px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 100%;
@@ -1865,6 +1898,8 @@ h1, h2, h3, h4, h5 {
   justify-content: space-between;
   box-sizing: border-box;
   min-width: 0;
+  border-top-left-radius: 27px;
+  border-bottom-left-radius: 27px;
 }
 
 .calc-result {
@@ -1876,6 +1911,8 @@ h1, h2, h3, h4, h5 {
   box-sizing: border-box;
   min-width: 0;
   position: relative;
+  border-top-right-radius: 27px;
+  border-bottom-right-radius: 27px;
 }
 
 .form-group {
@@ -2065,10 +2102,16 @@ h1, h2, h3, h4, h5 {
   }
   .calc-form {
     padding: 32px 24px 28px;
+    border-top-left-radius: 23px;
+    border-top-right-radius: 23px;
+    border-bottom-left-radius: 0;
   }
   .calc-result {
     padding: 32px 24px 30px;
     border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 23px;
+    border-bottom-right-radius: 23px;
   }
 }
 
@@ -2078,9 +2121,15 @@ h1, h2, h3, h4, h5 {
   }
   .calc-form {
     padding: 22px 16px;
+    border-top-left-radius: 17px;
+    border-top-right-radius: 17px;
+    border-bottom-left-radius: 0;
   }
   .calc-result {
     padding: 22px 16px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 17px;
+    border-bottom-right-radius: 17px;
   }
   .form-row {
     grid-template-columns: 1fr;

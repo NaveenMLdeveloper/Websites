@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://tkvdroptaxi.com/sitemap.xml
