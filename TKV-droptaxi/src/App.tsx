@@ -1146,7 +1146,7 @@ export default function App() {
                     <div className="vehicle-body">
                       <h3>{v.name}</h3>
                       <div className="vehicle-price">
-                        One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km · Driver Bata:₹400
+                        One-Way: ₹{v.onewayRate}/km · Round: ₹{v.roundRate}/km
                       </div>
                       <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', fontWeight: 500 }}>
                         Local: ₹{v.localPackage?.baseFare} (8h / 100km)
