@@ -5,9 +5,12 @@ interface Env {
 }
 
 export const onRequestGet = async (context: { request: Request; env: Env }) => {
-  const apiKey = context.env.GOOGLE_MAPS_API_KEY || context.env.GOOGLE_API_KEY || context.env.VITE_GOOGLE_MAPS_API_KEY;
+  const apiKey = (context.env.GOOGLE_MAPS_API_KEY || context.env.GOOGLE_API_KEY || context.env.VITE_GOOGLE_MAPS_API_KEY)?.trim();
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'GOOGLE_MAPS_API_KEY environment variable is not configured.' }), {
+    return new Response(JSON.stringify({
+      error: 'GOOGLE_MAPS_API_KEY environment variable is not configured.',
+      foundKeys: Object.keys(context.env || {})
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
