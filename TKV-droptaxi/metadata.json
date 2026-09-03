@@ -1,0 +1,6 @@
+{
+  "name": "TKV Drop Taxi",
+  "description": "TKV Drop Taxi — #1 Outstation & Drop Taxi in Hosur, Bangalore, Chennai & South India. Zero return fare. Sanitized AC cabs, 24x7 instant WhatsApp booking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
