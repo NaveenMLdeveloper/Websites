@@ -128,10 +128,17 @@ export const BriefcaseIcon: React.FC<IconProps> = ({ className = 'w-6 h-6', ...p
   </svg>
 );
 
-export const SchoolIcon: React.FC<IconProps> = ({ className = 'w-6 h-6', ...props }) => (
+export const HeartPulseIcon: React.FC<IconProps> = ({ className = 'w-6 h-6', ...props }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M22 10 12 5 2 10l10 5 10-5z" />
-    <path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5" />
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <path d="M3.22 12H9.5l1.5-3 2 6 1.5-3h6.28" />
+  </svg>
+);
+
+export const CompassIcon: React.FC<IconProps> = ({ className = 'w-6 h-6', ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
   </svg>
 );
 

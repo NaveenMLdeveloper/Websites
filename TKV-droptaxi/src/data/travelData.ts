@@ -296,20 +296,20 @@ export const SERVICES: ServiceItem[] = [
     desc: "Professional chauffeur service for VIP clients and executives."
   },
   {
-    id: "school",
-    name: "School Trips",
-    icon: "school",
-    image: "/images/services/school-trips.png",
-    fallbackImage: "/images/services/school-trips.png",
-    desc: "Safe, verified transport with speed limiters for school outings."
+    id: "medical",
+    name: "Hospital & Medical Transit",
+    icon: "heart-pulse",
+    image: "/images/services/medical-transit.png",
+    fallbackImage: "/images/services/outstation.png",
+    desc: "Comfortable, sanitized transit for hospital appointments, checkups & treatments across Bangalore & Chennai."
   },
   {
-    id: "college",
-    name: "College Trips",
-    icon: "book",
-    image: "/images/services/college-trips.png",
-    fallbackImage: "/images/services/college-trips.png",
-    desc: "Group tempo travellers & buses for college tours and industrial visits."
+    id: "hillstation",
+    name: "Weekend & Hill Getaways",
+    icon: "compass",
+    image: "/images/services/hill-station.png",
+    fallbackImage: "/images/services/tour-packages.png",
+    desc: "Chauffeured scenic trips to Yercaud, Ooty, Kodaikanal, Coorg & Yelagiri with zero return charges."
   },
   {
     id: "packages",
