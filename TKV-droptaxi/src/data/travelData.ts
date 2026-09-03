@@ -299,16 +299,16 @@ export const SERVICES: ServiceItem[] = [
     id: "medical",
     name: "Hospital & Medical Transit",
     icon: "heart-pulse",
-    image: "/images/services/medical-transit.png",
-    fallbackImage: "/images/services/outstation.png",
+    image: "/images/services/hospital.png",
+    fallbackImage: "/images/services/hospital.png",
     desc: "Comfortable, sanitized transit for hospital appointments, checkups & treatments across Bangalore & Chennai."
   },
   {
     id: "hillstation",
     name: "Weekend & Hill Getaways",
     icon: "compass",
-    image: "/images/services/hill-station.png",
-    fallbackImage: "/images/services/tour-packages.png",
+    image: "/images/services/weekend.png",
+    fallbackImage: "/images/services/weekend.png",
     desc: "Chauffeured scenic trips to Yercaud, Ooty, Kodaikanal, Coorg & Yelagiri with zero return charges."
   },
   {

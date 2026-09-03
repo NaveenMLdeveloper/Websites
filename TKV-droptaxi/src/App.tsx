@@ -521,7 +521,7 @@ export default function App() {
       }
     ];
 
-    let scriptTag = document.getElementById('tkw-seo-schema');
+    let scriptTag = document.getElementById('tkw-seo-schema') as HTMLScriptElement | null;
     if (!scriptTag) {
       scriptTag = document.createElement('script');
       scriptTag.id = 'tkw-seo-schema';
