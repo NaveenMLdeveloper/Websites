@@ -290,7 +290,7 @@ export default function App() {
         distance: pkg.baseKm,
         billedKm: pkg.baseKm,
         rate: pkg.extraKmRate,
-        total: pkg.baseFare + driverBata,
+        total: pkg.baseFare,
         zeroReturn: false,
         isLocal: true,
         pkg
@@ -608,7 +608,7 @@ export default function App() {
       const validExtraHours = Math.max(toNumber(extraHours, 0), 0);
       const extraKmCost = validExtraKm * pkg.extraKmRate;
       const extraWaitingCost = validExtraHours * pkg.waitingPerHour;
-      const total = pkg.baseFare + extraKmCost + extraWaitingCost + driverBata;
+      const total = pkg.baseFare + extraKmCost + extraWaitingCost;
 
       return {
         tripType: 'local',
@@ -622,7 +622,7 @@ export default function App() {
         billedKm: pkg.baseKm + validExtraKm,
         total,
         dist: pkg.baseKm + validExtraKm,
-        driverBata
+        driverBata: 0
       };
     }
 
@@ -1614,10 +1614,6 @@ export default function App() {
                           <span id="rExtraHours">{formatINR(calculation.extraWaitingCost || 0)}</span>
                         </div>
                       ) : null}
-                      <div className="result-row">
-                        <span>Driver Bata</span>
-                        <span id="rDriverBeta" style={{ color: '#FCD34D' }}>{formatINR(calculation.driverBata || 400)}</span>
-                      </div>
                       <div className="result-row">
                         <span>Toll &amp; Parking</span>
                         <span id="rTollExtra" style={{ color: '#FCD34D' }}>Extra</span>
