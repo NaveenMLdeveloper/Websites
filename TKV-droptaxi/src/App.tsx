@@ -346,7 +346,7 @@ export default function App() {
     }
 
     message += `• *Toll & Parking:* Extra\n` +
-      `• *Driver Bata:* ₹400\n` +
+      (heroTripType !== 'local' ? `• *Driver Bata:* ₹400\n` : '') +
       (heroName ? `• *Passenger Name:* ${heroName}\n` : '') +
       (heroPhone ? `• *WhatsApp / Phone:* ${heroPhone}\n` : '') +
       `----------------------------------------\n` +
@@ -669,7 +669,7 @@ export default function App() {
 
     message += `• *Estimated Fare:* ${formatINR(calculation.total)}\n` +
       `• *Toll & Parking:* Extra\n` +
-      `• *Driver Bata:* ${formatINR(calculation.driverBata || 400)}\n` +
+      (tripType !== 'local' ? `• *Driver Bata:* ${formatINR(calculation.driverBata || 400)}\n` : '') +
       `----------------------------------------\n` +
       `Please confirm vehicle availability and booking.`;
 

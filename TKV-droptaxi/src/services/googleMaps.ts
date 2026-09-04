@@ -1,8 +1,11 @@
+import { POPULAR_CITY_LOCATIONS, POPULAR_DISTANCES } from '../data/travelData';
+
 export interface PlacePrediction {
   placeId: string;
   text: string;
   mainText: string;
   secondaryText?: string;
+  isLocalFallback?: boolean;
 }
 
 export interface SelectedPlace {
@@ -50,14 +53,43 @@ export function formatDuration(duration: string | number | undefined | null): st
 }
 
 /**
- * Request autocomplete suggestions for a given input query from Google Places API (New)
+ * Finds matching cities from local South India / Tamil Nadu dataset when offline or quota reached
+ */
+export function getLocalCityPredictions(query: string): PlacePrediction[] {
+  const q = (query || '').toLowerCase().trim();
+  if (!q) return [];
+
+  const matched = POPULAR_CITY_LOCATIONS.filter((c) => {
+    if (c.name.toLowerCase().includes(q)) return true;
+    if (c.state && c.state.toLowerCase().includes(q)) return true;
+    if (c.description && c.description.toLowerCase().includes(q)) return true;
+    if (c.aliases && c.aliases.some((a) => a.toLowerCase().includes(q))) return true;
+    return false;
+  });
+
+  return matched.map((c) => ({
+    placeId: `local-${c.name.toLowerCase().replace(/\s+/g, '-')}`,
+    text: `${c.name}, ${c.state || 'India'}`,
+    mainText: c.name,
+    secondaryText: c.description || `${c.state || 'India'}`,
+    isLocalFallback: true
+  }));
+}
+
+/**
+ * Request autocomplete suggestions with automatic failover to local city database
  */
 export async function fetchPlaceAutocomplete(
   input: string
-): Promise<{ predictions: PlacePrediction[]; error?: string }> {
+): Promise<{ predictions: PlacePrediction[]; error?: string; isFallback?: boolean }> {
   const query = (input || '').trim();
   if (!query) {
     return { predictions: [] };
+  }
+
+  // For 1 character queries, provide instant local suggestions without burning Google API quota
+  if (query.length === 1) {
+    return { predictions: getLocalCityPredictions(query), isFallback: true };
   }
 
   try {
@@ -69,9 +101,11 @@ export async function fetchPlaceAutocomplete(
 
     const data = await res.json();
     if (!res.ok || data.error) {
+      console.warn('Places API returned error or quota limit. Using local city suggestions.', data.error);
+      const fallbackList = getLocalCityPredictions(query);
       return {
-        predictions: [],
-        error: data.error || `Error ${res.status}: Failed to fetch places`
+        predictions: fallbackList,
+        isFallback: true
       };
     }
 
@@ -92,20 +126,44 @@ export async function fetchPlaceAutocomplete(
         };
       });
 
+    // If Google returned 0 suggestions, supplement with local matches
+    if (predictions.length === 0) {
+      const localMatches = getLocalCityPredictions(query);
+      if (localMatches.length > 0) {
+        return { predictions: localMatches, isFallback: true };
+      }
+    }
+
     return { predictions };
   } catch (err: any) {
+    console.warn('Network error calling places autocomplete. Using local suggestions:', err);
     return {
-      predictions: [],
-      error: err.message || 'Network error fetching place suggestions'
+      predictions: getLocalCityPredictions(query),
+      isFallback: true
     };
   }
 }
 
 /**
- * Fetch place details (coordinates, formatted address) for a place ID using Places API (New)
+ * Fetch place details (coordinates, formatted address) for a place ID using Places API (New) or local fallback
  */
 export async function fetchPlaceDetails(placeId: string): Promise<SelectedPlace | null> {
   if (!placeId) return null;
+
+  // Local city fallback
+  if (placeId.startsWith('local-')) {
+    const cityName = placeId.replace('local-', '').replace(/-/g, ' ');
+    const matched = POPULAR_CITY_LOCATIONS.find((c) => c.name.toLowerCase() === cityName);
+    if (matched) {
+      return {
+        name: matched.name,
+        placeId,
+        lat: matched.lat,
+        lng: matched.lng,
+        formattedAddress: `${matched.name}, ${matched.state || 'India'}`
+      };
+    }
+  }
 
   try {
     const res = await fetch(`/api/place-details?placeId=${encodeURIComponent(placeId)}`);
@@ -130,7 +188,75 @@ export async function fetchPlaceDetails(placeId: string): Promise<SelectedPlace 
 }
 
 /**
+ * Computes road distance between two locations from local database or coordinate math
+ */
+export function getOfflineDistance(
+  origin: SelectedPlace | string,
+  destination: SelectedPlace | string
+): RouteResult | null {
+  const origName = (typeof origin === 'string' ? origin : origin.name || origin.formattedAddress || '').toLowerCase().trim();
+  const destName = (typeof destination === 'string' ? destination : destination.name || destination.formattedAddress || '').toLowerCase().trim();
+  if (!origName || !destName) return null;
+
+  // 1. Direct match in POPULAR_DISTANCES
+  const key1 = `${origName}-${destName}`;
+  const key2 = `${destName}-${origName}`;
+  let km = POPULAR_DISTANCES[key1] || POPULAR_DISTANCES[key2];
+
+  // 2. Partial match if city name is contained (e.g. "Hosur, Tamil Nadu" -> "hosur")
+  if (!km) {
+    for (const [routeKey, dist] of Object.entries(POPULAR_DISTANCES)) {
+      const [c1, c2] = routeKey.split('-');
+      if (origName.includes(c1) && destName.includes(c2)) {
+        km = dist;
+        break;
+      }
+      if (origName.includes(c2) && destName.includes(c1)) {
+        km = dist;
+        break;
+      }
+    }
+  }
+
+  // 3. Coordinate-based estimation (Haversine formula * 1.3 road curvature factor)
+  const oLat = typeof origin === 'object' ? origin.lat : undefined;
+  const oLng = typeof origin === 'object' ? origin.lng : undefined;
+  const dLat = typeof destination === 'object' ? destination.lat : undefined;
+  const dLng = typeof destination === 'object' ? destination.lng : undefined;
+
+  if (!km && oLat != null && oLng != null && dLat != null && dLng != null) {
+    const R = 6371; // Earth radius in km
+    const dLatRad = ((dLat - oLat) * Math.PI) / 180;
+    const dLonRad = ((dLng - oLng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLatRad / 2) * Math.sin(dLatRad / 2) +
+      Math.cos((oLat * Math.PI) / 180) *
+        Math.cos((dLat * Math.PI) / 180) *
+        Math.sin(dLonRad / 2) *
+        Math.sin(dLonRad / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const crowKm = R * c;
+    // Road factor is typically 1.25x - 1.35x crow-fly distance in South India
+    km = Math.max(30, Math.round(crowKm * 1.3));
+  }
+
+  if (km) {
+    const hours = Math.floor(km / 60);
+    const mins = Math.round((km % 60) * 1.1);
+    const durStr = hours > 0 ? `${hours} hr ${mins} min` : `${mins} min`;
+    return {
+      distanceKm: km,
+      distanceMeters: km * 1000,
+      duration: durStr
+    };
+  }
+
+  return null;
+}
+
+/**
  * Calculate driving distance between origin and destination using Google Routes API
+ * with automatic fallback to popular routes and coordinate math
  */
 export async function calculateDrivingDistance(
   origin: SelectedPlace | string,
@@ -147,7 +273,7 @@ export async function calculateDrivingDistance(
           }
         }
       };
-    } else if (typeof origin === 'object' && origin.placeId) {
+    } else if (typeof origin === 'object' && origin.placeId && !origin.placeId.startsWith('local-')) {
       originPayload = { placeId: origin.placeId };
     } else {
       const address = typeof origin === 'string' ? origin : origin.name;
@@ -167,7 +293,7 @@ export async function calculateDrivingDistance(
           }
         }
       };
-    } else if (typeof destination === 'object' && destination.placeId) {
+    } else if (typeof destination === 'object' && destination.placeId && !destination.placeId.startsWith('local-')) {
       destPayload = { placeId: destination.placeId };
     } else {
       const address = typeof destination === 'string' ? destination : destination.name;
@@ -188,8 +314,13 @@ export async function calculateDrivingDistance(
 
     const data = await res.json();
     if (!res.ok || data.error) {
+      console.warn('Routes API returned error or quota limit. Checking local distance fallback...', data.error);
+      const offline = getOfflineDistance(origin, destination);
+      if (offline) {
+        return { result: offline };
+      }
       return {
-        error: data.error || `Routes API error (Status ${res.status})`
+        error: 'Estimated fare will be confirmed on WhatsApp.'
       };
     }
 
@@ -201,8 +332,13 @@ export async function calculateDrivingDistance(
       }
     };
   } catch (err: any) {
+    console.warn('Network error calculating route distance. Checking local distance fallback...', err);
+    const offline = getOfflineDistance(origin, destination);
+    if (offline) {
+      return { result: offline };
+    }
     return {
-      error: err.message || 'Network error calculating route distance'
+      error: 'Estimated fare will be confirmed on WhatsApp.'
     };
   }
 }

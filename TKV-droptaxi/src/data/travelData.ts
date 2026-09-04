@@ -47,22 +47,56 @@ export interface ReviewItem {
   quote: string;
 }
 
-export const POPULAR_CITIES = [
-  "Hosur",
-  "Bangalore",
-  "Bangalore Airport",
-  "Chennai",
-  "Salem",
-  "Coimbatore",
-  "Krishnagiri",
-  "Tirupati",
-  "Pondicherry",
-  "Trichy",
-  "Madurai",
-  "Vellore",
-  "Mysore",
-  "Ooty"
+export interface CityLocation {
+  name: string;
+  state?: string;
+  lat: number;
+  lng: number;
+  description?: string;
+  aliases?: string[];
+}
+
+export const POPULAR_CITY_LOCATIONS: CityLocation[] = [
+  { name: "Hosur", state: "Tamil Nadu", lat: 12.7407, lng: 77.8204, description: "Industrial Hub, Near Bangalore border" },
+  { name: "Bangalore", state: "Karnataka", lat: 12.9716, lng: 77.5946, description: "Silicon Valley of India, Karnataka", aliases: ["bengaluru", "blr"] },
+  { name: "Bangalore Airport", state: "Karnataka", lat: 13.1986, lng: 77.7066, description: "Kempegowda International Airport", aliases: ["kia", "kempegowda", "devanahalli", "blr airport"] },
+  { name: "Chennai", state: "Tamil Nadu", lat: 13.0827, lng: 80.2707, description: "Capital of Tamil Nadu", aliases: ["madras", "maa"] },
+  { name: "Chennai Airport", state: "Tamil Nadu", lat: 12.9941, lng: 80.1709, description: "Meenambakkam International Airport", aliases: ["maa airport", "meenambakkam"] },
+  { name: "Salem", state: "Tamil Nadu", lat: 11.6643, lng: 78.1460, description: "Steel City, Central Tamil Nadu" },
+  { name: "Coimbatore", state: "Tamil Nadu", lat: 11.0168, lng: 76.9558, description: "Manchester of South India", aliases: ["kovai", "cjb"] },
+  { name: "Coimbatore Airport", state: "Tamil Nadu", lat: 11.0298, lng: 77.0434, description: "Peelamedu Airport", aliases: ["cjb airport", "peelamedu"] },
+  { name: "Krishnagiri", state: "Tamil Nadu", lat: 12.5186, lng: 78.2137, description: "Mango City, Tamil Nadu" },
+  { name: "Tirupati", state: "Andhra Pradesh", lat: 13.6288, lng: 79.4192, description: "Pilgrimage City, Balaji Temple" },
+  { name: "Pondicherry", state: "Puducherry", lat: 11.9416, lng: 79.8083, description: "French Quarter & Promenade Beach", aliases: ["puducherry", "pondy"] },
+  { name: "Trichy", state: "Tamil Nadu", lat: 10.7905, lng: 78.7047, description: "Rockfort City, Central Tamil Nadu", aliases: ["tiruchirappalli"] },
+  { name: "Madurai", state: "Tamil Nadu", lat: 9.9252, lng: 78.1198, description: "Temple City, Meenakshi Amman Temple" },
+  { name: "Vellore", state: "Tamil Nadu", lat: 12.9165, lng: 79.1325, description: "CMC Hospital & Golden Temple" },
+  { name: "Mysore", state: "Karnataka", lat: 12.2958, lng: 76.6394, description: "Palace City, Heritage Karnataka", aliases: ["mysuru"] },
+  { name: "Ooty", state: "Tamil Nadu", lat: 11.4102, lng: 76.6950, description: "Queen of Hill Stations, Nilgiris", aliases: ["udhagamandalam"] },
+  { name: "Kodaikanal", state: "Tamil Nadu", lat: 10.2381, lng: 77.4892, description: "Princess of Hill Stations" },
+  { name: "Dharmapuri", state: "Tamil Nadu", lat: 12.1211, lng: 78.1582, description: "Hogenakkal Falls Region" },
+  { name: "Erode", state: "Tamil Nadu", lat: 11.3410, lng: 77.7172, description: "Turmeric City, Kongu Region" },
+  { name: "Tiruppur", state: "Tamil Nadu", lat: 11.1085, lng: 77.3411, description: "Knitwear Capital of India" },
+  { name: "Thanjavur", state: "Tamil Nadu", lat: 10.7870, lng: 79.1378, description: "Brihadeeswara Big Temple", aliases: ["tanjore"] },
+  { name: "Dindigul", state: "Tamil Nadu", lat: 10.3673, lng: 77.9803, description: "Lock City & Biryani Capital" },
+  { name: "Namakkal", state: "Tamil Nadu", lat: 11.2189, lng: 78.1674, description: "Poultry Capital & Anjaneyar Temple" },
+  { name: "Karur", state: "Tamil Nadu", lat: 10.9601, lng: 78.0766, description: "Textile City on Amaravathi River" },
+  { name: "Kanchipuram", state: "Tamil Nadu", lat: 12.8342, lng: 79.7036, description: "Silk City & Temple City" },
+  { name: "Tiruvannamalai", state: "Tamil Nadu", lat: 12.2253, lng: 79.0747, description: "Annamalaiyar Temple & Girivalam" },
+  { name: "Cuddalore", state: "Tamil Nadu", lat: 11.7480, lng: 79.7714, description: "Silver Beach & Coastal Port" },
+  { name: "Villupuram", state: "Tamil Nadu", lat: 11.9401, lng: 79.4861, description: "Gateway to Central & South TN" },
+  { name: "Tirunelveli", state: "Tamil Nadu", lat: 8.7139, lng: 77.7567, description: "Nellaiappar Temple & Halwa City" },
+  { name: "Kanyakumari", state: "Tamil Nadu", lat: 8.0883, lng: 77.5385, description: "Southernmost Tip of India" },
+  { name: "Rameswaram", state: "Tamil Nadu", lat: 9.2876, lng: 79.3129, description: "Holy Island, Ramanathaswamy Temple" },
+  { name: "Kumbakonam", state: "Tamil Nadu", lat: 10.9602, lng: 79.3845, description: "Navagraha Temples City" },
+  { name: "Chidambaram", state: "Tamil Nadu", lat: 11.3992, lng: 79.6937, description: "Nataraja Temple & Pichavaram" },
+  { name: "Yercaud", state: "Tamil Nadu", lat: 11.7753, lng: 78.2093, description: "Jewel of the South, Shevaroy Hills" },
+  { name: "Yelagiri", state: "Tamil Nadu", lat: 12.5784, lng: 78.6399, description: "Hill Station near Jolarpettai" },
+  { name: "Theni", state: "Tamil Nadu", lat: 10.0104, lng: 77.4768, description: "Western Ghats, Cardamom City" },
+  { name: "Nagercoil", state: "Tamil Nadu", lat: 8.1833, lng: 77.4119, description: "Kanyakumari District HQ" }
 ];
+
+export const POPULAR_CITIES = POPULAR_CITY_LOCATIONS.map(c => c.name);
 
 export const POPULAR_DISTANCES: Record<string, number> = {
   "hosur-bangalore": 45,

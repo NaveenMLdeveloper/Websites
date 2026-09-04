@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchPlaceAutocomplete, fetchPlaceDetails, PlacePrediction, SelectedPlace } from '../services/googleMaps';
+import { fetchPlaceAutocomplete, fetchPlaceDetails, getLocalCityPredictions, PlacePrediction, SelectedPlace } from '../services/googleMaps';
 
 interface PlacesAutocompleteInputProps {
   id: string;
@@ -25,14 +25,15 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [isLocalMode, setIsLocalMode] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<any>(null);
   const justSelectedRef = useRef(false);
+  const cacheRef = useRef<Map<string, PlacePrediction[]>>(new Map());
 
-  // Debounced search on typing
+  // Debounced search on typing with in-memory caching and offline fallback
   useEffect(() => {
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
@@ -43,7 +44,27 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
     if (!trimmed) {
       setPredictions([]);
       setIsOpen(false);
-      setApiError(null);
+      return;
+    }
+
+    // 1-character input: show instant local city matches without burning API quota
+    if (trimmed.length === 1) {
+      const localMatches = getLocalCityPredictions(trimmed);
+      setPredictions(localMatches);
+      setIsLocalMode(true);
+      setIsOpen(localMatches.length > 0);
+      setHighlightedIndex(-1);
+      return;
+    }
+
+    // Check memory cache first
+    const cacheKey = trimmed.toLowerCase();
+    if (cacheRef.current.has(cacheKey)) {
+      const cached = cacheRef.current.get(cacheKey) || [];
+      setPredictions(cached);
+      setIsLocalMode(cached.some(p => p.isLocalFallback));
+      setIsOpen(cached.length > 0);
+      setHighlightedIndex(-1);
       return;
     }
 
@@ -53,20 +74,16 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
 
     debounceTimerRef.current = setTimeout(async () => {
       setIsLoading(true);
-      setApiError(null);
       const res = await fetchPlaceAutocomplete(trimmed);
       setIsLoading(false);
 
-      if (res.error) {
-        setApiError(res.error);
-        setPredictions([]);
-        setIsOpen(true);
-      } else {
-        setPredictions(res.predictions);
-        setIsOpen(res.predictions.length > 0);
-        setHighlightedIndex(-1);
-      }
-    }, 220);
+      const results = res.predictions || [];
+      cacheRef.current.set(cacheKey, results);
+      setPredictions(results);
+      setIsLocalMode(!!res.isFallback);
+      setIsOpen(results.length > 0);
+      setHighlightedIndex(-1);
+    }, 320);
 
     return () => {
       if (debounceTimerRef.current) {
@@ -93,13 +110,10 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
     justSelectedRef.current = true;
     setIsOpen(false);
     setPredictions([]);
-    setApiError(null);
 
-    // Prefer the place's main name or full text
     const displayValue = prediction.mainText || prediction.text;
     onChange(displayValue);
 
-    // Notify immediately with placeId and text
     const initialPlace: SelectedPlace = {
       name: displayValue,
       placeId: prediction.placeId,
@@ -107,7 +121,6 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
     };
     onSelectPlace(initialPlace);
 
-    // Fetch place details to retrieve coordinates (latitude, longitude)
     if (prediction.placeId) {
       const details = await fetchPlaceDetails(prediction.placeId);
       if (details) {
@@ -120,8 +133,19 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
     }
   };
 
+  const handleSelectCustomText = (text: string) => {
+    justSelectedRef.current = true;
+    setIsOpen(false);
+    setPredictions([]);
+    onChange(text);
+    onSelectPlace({
+      name: text,
+      formattedAddress: text
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!isOpen || predictions.length === 0) return;
+    if (!isOpen) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -133,11 +157,18 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
       if (highlightedIndex >= 0 && highlightedIndex < predictions.length) {
         e.preventDefault();
         handleSelectPrediction(predictions[highlightedIndex]);
+      } else if (value.trim()) {
+        e.preventDefault();
+        handleSelectCustomText(value.trim());
       }
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
   };
+
+  const hasDirectMatch = predictions.some(
+    (p) => p.mainText.toLowerCase() === value.trim().toLowerCase()
+  );
 
   return (
     <div className="relative" ref={containerRef}>
@@ -160,7 +191,7 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => {
-            if (predictions.length > 0 || apiError) {
+            if (predictions.length > 0 || value.trim().length > 0) {
               setIsOpen(true);
             }
           }}
@@ -189,55 +220,64 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
         )}
       </div>
 
-      {/* Google Places Autocomplete Dropdown */}
-      {isOpen && (
+      {/* Autocomplete Dropdown */}
+      {isOpen && (predictions.length > 0 || (value.trim() && !hasDirectMatch)) && (
         <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-white rounded-lg shadow-xl border border-slate-200 overflow-hidden text-left animate-in fade-in duration-150">
-          {apiError ? (
-            <div className="p-3 text-xs bg-amber-50 border-b border-amber-100 text-amber-900">
-              <div className="font-semibold flex items-center gap-1.5 text-amber-800">
-                <span>⚠️ Google Places API</span>
-              </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-amber-700">{apiError}</p>
-            </div>
-          ) : predictions.length > 0 ? (
-            <ul className="max-h-56 overflow-y-auto divide-y divide-slate-100 m-0 p-0 list-none">
-              {predictions.map((pred, index) => {
-                const isHighlighted = index === highlightedIndex;
-                return (
-                  <li
-                    key={pred.placeId || index}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleSelectPrediction(pred);
-                    }}
-                    onMouseEnter={() => setHighlightedIndex(index)}
-                    className={`flex items-start gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors ${
-                      isHighlighted ? 'bg-blue-50 text-blue-900' : 'hover:bg-slate-50 text-slate-800'
-                    }`}
+          <ul className="max-h-56 overflow-y-auto divide-y divide-slate-100 m-0 p-0 list-none">
+            {predictions.map((pred, index) => {
+              const isHighlighted = index === highlightedIndex;
+              return (
+                <li
+                  key={pred.placeId || index}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelectPrediction(pred);
+                  }}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                  className={`flex items-start gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors ${
+                    isHighlighted ? 'bg-blue-50 text-blue-900' : 'hover:bg-slate-50 text-slate-800'
+                  }`}
+                >
+                  <svg
+                    className={`w-4 h-4 mt-0.5 shrink-0 ${isHighlighted ? 'text-blue-600' : 'text-slate-400'}`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
                   >
-                    <svg
-                      className={`w-4 h-4 mt-0.5 shrink-0 ${isHighlighted ? 'text-blue-600' : 'text-slate-400'}`}
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                    </svg>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-[12px] truncate text-slate-900">{pred.mainText}</div>
-                      {pred.secondaryText && (
-                        <div className="text-[10.5px] text-slate-500 truncate">{pred.secondaryText}</div>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-[12px] truncate text-slate-900">{pred.mainText}</div>
+                    {pred.secondaryText && (
+                      <div className="text-[10.5px] text-slate-500 truncate">{pred.secondaryText}</div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
 
-          {/* Google Attribution Footer */}
+            {/* Direct match option if user typed custom text */}
+            {value.trim() && !hasDirectMatch && (
+              <li
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelectCustomText(value.trim());
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer bg-slate-50 hover:bg-blue-50 text-slate-700 transition-colors border-t border-slate-100"
+              >
+                <svg className="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="truncate">Use <strong>"{value.trim()}"</strong> as location</span>
+              </li>
+            )}
+          </ul>
+
+          {/* Attribution Footer */}
           <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-            <span>Google Maps Platform</span>
-            <span className="font-medium text-slate-500">powered by Google</span>
+            <span>{isLocalMode ? 'Popular Locations' : 'Google Maps Platform'}</span>
+            <span className="font-medium text-slate-500">
+              {isLocalMode ? 'Tamil Nadu & South India' : 'powered by Google'}
+            </span>
           </div>
         </div>
       )}

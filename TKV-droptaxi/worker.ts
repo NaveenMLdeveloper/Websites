@@ -1,14 +1,12 @@
 import { onRequestGet as placeDetails } from './functions/api/place-details';
 import { onRequestPost as placesAutocomplete } from './functions/api/places-autocomplete';
 import { onRequestPost as routeDistance } from './functions/api/route-distance';
+import { MultiKeyEnv } from './functions/api/_googleMapsHelper';
 
-interface Env {
+interface Env extends MultiKeyEnv {
   ASSETS: {
     fetch(request: Request): Promise<Response>;
   };
-  GOOGLE_MAPS_API_KEY?: string;
-  GOOGLE_API_KEY?: string;
-  VITE_GOOGLE_MAPS_API_KEY?: string;
 }
 
 export default {

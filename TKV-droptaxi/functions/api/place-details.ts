@@ -1,12 +1,8 @@
-interface Env {
-  GOOGLE_MAPS_API_KEY?: string;
-  GOOGLE_API_KEY?: string;
-  VITE_GOOGLE_MAPS_API_KEY?: string;
-}
+import { fetchWithGoogleKeyFallback, getApiKeys, MultiKeyEnv } from './_googleMapsHelper';
 
-export const onRequestGet = async (context: { request: Request; env: Env }) => {
-  const apiKey = (context.env.GOOGLE_MAPS_API_KEY || context.env.GOOGLE_API_KEY || context.env.VITE_GOOGLE_MAPS_API_KEY)?.trim();
-  if (!apiKey) {
+export const onRequestGet = async (context: { request: Request; env: MultiKeyEnv }) => {
+  const keys = getApiKeys(context.env);
+  if (keys.length === 0) {
     return new Response(JSON.stringify({
       error: 'GOOGLE_MAPS_API_KEY environment variable is not configured.',
       foundKeys: Object.keys(context.env || {})
@@ -26,30 +22,31 @@ export const onRequestGet = async (context: { request: Request; env: Env }) => {
   }
 
   try {
-    const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': 'id,displayName,location,formattedAddress',
-        'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
-      }
+    const { ok, status, data } = await fetchWithGoogleKeyFallback(keys, (apiKey) => {
+      return fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'id,displayName,location,formattedAddress',
+          'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+        }
+      });
     });
 
-    const data = (await res.json()) as any;
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: data?.error?.message || 'Places API Details error' }), {
-        status: res.status,
+    if (!ok) {
+      return new Response(JSON.stringify({ error: (data as any)?.error?.message || 'Places API Details error' }), {
+        status,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
     return new Response(
       JSON.stringify({
-        placeId: data.id,
-        displayName: data.displayName?.text,
-        formattedAddress: data.formattedAddress,
-        location: data.location
+        placeId: (data as any).id,
+        displayName: (data as any).displayName?.text,
+        formattedAddress: (data as any).formattedAddress,
+        location: (data as any).location
       }),
       {
         headers: { 'Content-Type': 'application/json' }

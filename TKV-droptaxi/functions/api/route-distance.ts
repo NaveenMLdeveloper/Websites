@@ -1,12 +1,8 @@
-interface Env {
-  GOOGLE_MAPS_API_KEY?: string;
-  GOOGLE_API_KEY?: string;
-  VITE_GOOGLE_MAPS_API_KEY?: string;
-}
+import { fetchWithGoogleKeyFallback, getApiKeys, MultiKeyEnv } from './_googleMapsHelper';
 
-export const onRequestPost = async (context: { request: Request; env: Env }) => {
-  const apiKey = (context.env.GOOGLE_MAPS_API_KEY || context.env.GOOGLE_API_KEY || context.env.VITE_GOOGLE_MAPS_API_KEY)?.trim();
-  if (!apiKey) {
+export const onRequestPost = async (context: { request: Request; env: MultiKeyEnv }) => {
+  const keys = getApiKeys(context.env);
+  if (keys.length === 0) {
     return new Response(JSON.stringify({
       error: 'GOOGLE_MAPS_API_KEY environment variable is not configured.',
       foundKeys: Object.keys(context.env || {})
@@ -34,26 +30,27 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       units: 'METRIC'
     };
 
-    const res = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration',
-        'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
-      },
-      body: JSON.stringify(payload)
+    const { ok, status, data } = await fetchWithGoogleKeyFallback(keys, (apiKey) => {
+      return fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration',
+          'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+        },
+        body: JSON.stringify(payload)
+      });
     });
 
-    const data = (await res.json()) as any;
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: data?.error?.message || 'Routes API error' }), {
-        status: res.status,
+    if (!ok) {
+      return new Response(JSON.stringify({ error: (data as any)?.error?.message || 'Routes API error' }), {
+        status,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const routes = data?.routes;
+    const routes = (data as any)?.routes;
     if (!routes || routes.length === 0) {
       return new Response(JSON.stringify({ error: 'No driving route found between these locations.' }), {
         status: 404,
