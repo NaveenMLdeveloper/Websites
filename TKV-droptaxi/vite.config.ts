@@ -73,7 +73,8 @@ function googleMapsApiDevPlugin(apiKeys: string[]): Plugin {
                   headers: {
                     'Content-Type': 'application/json',
                     'X-Goog-Api-Key': key,
-                    'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+                    'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio',
+                    'Referer': 'https://tkvdroptaxi.com/'
                   },
                   body: JSON.stringify({
                     input,
@@ -142,7 +143,8 @@ function googleMapsApiDevPlugin(apiKeys: string[]): Plugin {
                   'Content-Type': 'application/json',
                   'X-Goog-Api-Key': key,
                   'X-Goog-FieldMask': 'id,displayName,location,formattedAddress',
-                  'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+                  'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio',
+                  'Referer': 'https://tkvdroptaxi.com/'
                 }
               });
 
@@ -210,7 +212,8 @@ function googleMapsApiDevPlugin(apiKeys: string[]): Plugin {
                     'Content-Type': 'application/json',
                     'X-Goog-Api-Key': key,
                     'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration',
-                    'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+                    'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio',
+                    'Referer': 'https://tkvdroptaxi.com/'
                   },
                   body: JSON.stringify({
                     origin: parsed.origin,

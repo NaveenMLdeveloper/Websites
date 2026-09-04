@@ -29,7 +29,8 @@ export const onRequestGet = async (context: { request: Request; env: MultiKeyEnv
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': apiKey,
           'X-Goog-FieldMask': 'id,displayName,location,formattedAddress',
-          'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+          'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio',
+          'Referer': context.request.headers.get('referer') || 'https://tkvdroptaxi.com/'
         }
       });
     });

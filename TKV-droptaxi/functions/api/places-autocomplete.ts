@@ -27,7 +27,8 @@ export const onRequestPost = async (context: { request: Request; env: MultiKeyEn
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': apiKey,
-          'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio'
+          'X-Goog-Maps-Solution-ID': 'gmp_mcp_codeassist_v1_aistudio',
+          'Referer': context.request.headers.get('referer') || 'https://tkvdroptaxi.com/'
         },
         body: JSON.stringify({
           input,

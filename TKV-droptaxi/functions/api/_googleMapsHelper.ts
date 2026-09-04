@@ -59,6 +59,7 @@ export function isQuotaOrAuthError(status: number, bodyText: string): boolean {
     lower.includes('rate_limit') ||
     lower.includes('limit') ||
     lower.includes('blocked') ||
+    lower.includes('referer') ||
     lower.includes('project_number')
   );
 }
